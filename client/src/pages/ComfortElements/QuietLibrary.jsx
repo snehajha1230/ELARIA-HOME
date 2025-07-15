@@ -1,0 +1,192 @@
+import React, { useEffect, useState } from 'react';
+import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaMoon, FaSun } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import axios from '../../utils/api';
+import { toast } from 'react-toastify';
+
+const QuietLibrary = () => {
+  const [books, setBooks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchBooks = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await axios.get('/books', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBooks(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load books');
+    }
+  };
+
+  const deleteBook = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`/books/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Book removed from your shelf');
+      setBooks(books.filter((book) => book._id !== id));
+    } catch {
+      toast.error('Could not delete book');
+    }
+  };
+
+  const filteredBooks = books.filter(book => 
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    book.author.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    fetchBooks();
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
+  return (
+    <div className={`min-h-screen bg-fixed bg-center py-8 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-[#f5f1e6]'}`}>
+      {/* Wooden Shelf Background */}
+      <div className={`fixed inset-0 bg-[url('/wooden-shelf-texture.png')] bg-repeat opacity-10 dark:opacity-5 pointer-events-none z-0`}></div>
+      
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header with Navigation */}
+        <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-amber-100 dark:border-gray-700">
+          <div className="flex items-center mb-4 md:mb-0">
+            <FaBookOpen className="text-3xl mr-3 text-amber-600 dark:text-amber-400" />
+            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">My Library</h1>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-3 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search your books..."
+                className="pl-10 pr-4 py-2 rounded-full bg-white dark:bg-gray-700 border border-amber-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <button 
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-full bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-gray-600 transition"
+            >
+              {darkMode ? <FaSun /> : <FaMoon />}
+            </button>
+          </div>
+        </header>
+
+        {/* Main Shelf Area */}
+        <main className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-amber-100 dark:border-gray-700">
+          {/* Add Book Button */}
+          <div className="flex justify-end mb-8">
+            <button
+              onClick={() => navigate('/add-book')}
+              className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <FaPlus />
+              <span>Add to My Collection</span>
+            </button>
+          </div>
+
+          {/* Books Grid */}
+          {books.length === 0 ? (
+            <div className="text-center py-16">
+              <img src="/empty-shelf.svg" alt="No books" className="mx-auto w-56 opacity-80" />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your shelf is waiting for stories... 📖</p>
+              <p className="text-sm text-gray-400">Begin your collection with a book that speaks to your soul.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredBooks.map((book) => (
+                <div
+                  key={book._id}
+                  className="relative group bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-amber-100 dark:border-gray-600 hover:border-amber-300 dark:hover:border-amber-500"
+                >
+                  {/* Book Cover */}
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={book.coverUrl || '/default-book-cover.jpg'}
+                      alt={book.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/default-book-cover.jpg';
+                      }}
+                    />
+                    {/* Reading Progress */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-600">
+                      <div 
+                        className="h-full bg-amber-500" 
+                        style={{ width: `${book.progress || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Book Details - Now clearly visible */}
+                  <div className="p-5 bg-white dark:bg-gray-700">
+                    <h3 className="text-lg font-serif font-bold text-gray-800 dark:text-gray-100 mb-1 line-clamp-1">
+                      {book.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-3 line-clamp-1">
+                      by {book.author}
+                    </p>
+                    {book.description && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                        {book.description}
+                      </p>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="inline-block bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-3 py-1 text-xs rounded-full">
+                        {book.genre || 'Uncategorized'}
+                      </span>
+                      {book.progress > 0 && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {Math.round(book.progress)}% read
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteBook(book._id);
+                    }}
+                    className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p>Your personal sanctuary of stories • {books.length} books in your collection</p>
+          <p className="mt-1">"A room without books is like a body without a soul." — Cicero</p>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default QuietLibrary;
