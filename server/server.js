@@ -2,8 +2,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -28,29 +26,24 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Socket.IO Setup
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    credentials: true,
+    credentials: true
   },
   connectionStateRecovery: {
     maxDisconnectionDuration: 2 * 60 * 1000,
-    skipMiddlewares: true,
-  },
+    skipMiddlewares: true
+  }
 });
 
 // Middleware
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 
 // Log CORS origin
@@ -60,6 +53,7 @@ console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
+  // User-specific notification room
   socket.on('joinUserRoom', (userId) => {
     if (userId) {
       socket.join(`user-${userId}`);
@@ -67,6 +61,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Chat room join
   socket.on('joinChat', ({ chatId }) => {
     if (chatId) {
       socket.join(`chat-${chatId}`);
@@ -74,11 +69,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Chat message broadcast
   socket.on('sendMessage', ({ chatId, message }) => {
     if (chatId && message) {
       socket.to(`chat-${chatId}`).emit('newMessage', {
         chatId,
-        message,
+        message
       });
       console.log(`Message broadcasted to chat-${chatId}`);
     }
@@ -109,24 +105,16 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai', aiRoutes);
 
-// Serve React Frontend (Production)
-app.use(express.static(path.join(__dirname, '../client/dist'))); // Vite uses dist, CRA uses build
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
-
 // MongoDB Connection & Server Start
-mongoose
-  .connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     const PORT = process.env.PORT || 5000;
-    httpServer.listen(PORT, () =>
-      console.log(`Server running on port ${PORT}`)
-    );
+    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Export io for use elsewhere
+// Export io
 export { io };
+
+
