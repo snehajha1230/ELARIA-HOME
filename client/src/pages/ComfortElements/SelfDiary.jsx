@@ -50,13 +50,15 @@ const SelfDiary = () => {
         border: 'border-orange-200',
         button: 'bg-gradient-to-r from-orange-500 to-pink-500',
         text: 'text-amber-900',
+        secondaryText: 'text-amber-700',
         placeholder: 'placeholder-amber-300',
         focus: 'ring-orange-300',
         sidebar: 'bg-[#fdf1e9]',
         nav: 'bg-white/80',
         modal: 'bg-white',
         entryCard: 'bg-white hover:bg-pink-50',
-        timeText: 'text-pink-600'
+        timeText: 'text-pink-600',
+        writingArea: 'bg-[#fff9f5]'
       },
       dark: {
         bg: 'from-[#2a1a12] to-[#3a2218]',
@@ -64,13 +66,15 @@ const SelfDiary = () => {
         border: 'border-orange-900',
         button: 'bg-gradient-to-r from-orange-600 to-pink-600',
         text: 'text-amber-100',
+        secondaryText: 'text-amber-200',
         placeholder: 'placeholder-amber-700',
         focus: 'ring-orange-600',
         sidebar: 'bg-[#1a120e]',
         nav: 'bg-[#1a120e]/80',
         modal: 'bg-[#1a120e]',
         entryCard: 'bg-[#2a1a12] hover:bg-[#3a2218]',
-        timeText: 'text-pink-300'
+        timeText: 'text-pink-300',
+        writingArea: 'bg-[#1a120e]'
       }
     },
     forest: {
@@ -80,13 +84,15 @@ const SelfDiary = () => {
         border: 'border-emerald-200',
         button: 'bg-gradient-to-r from-emerald-500 to-teal-500',
         text: 'text-emerald-900',
+        secondaryText: 'text-emerald-700',
         placeholder: 'placeholder-emerald-300',
         focus: 'ring-emerald-300',
         sidebar: 'bg-[#e6f3e6]',
         nav: 'bg-white/80',
         modal: 'bg-white',
         entryCard: 'bg-white hover:bg-emerald-50',
-        timeText: 'text-teal-600'
+        timeText: 'text-teal-600',
+        writingArea: 'bg-[#f5f9f5]'
       },
       dark: {
         bg: 'from-[#0f1a10] to-[#142316]',
@@ -94,13 +100,15 @@ const SelfDiary = () => {
         border: 'border-emerald-900',
         button: 'bg-gradient-to-r from-emerald-600 to-teal-600',
         text: 'text-emerald-100',
+        secondaryText: 'text-emerald-200',
         placeholder: 'placeholder-emerald-700',
         focus: 'ring-emerald-600',
         sidebar: 'bg-[#0c130d]',
         nav: 'bg-[#0c130d]/80',
         modal: 'bg-[#0c130d]',
         entryCard: 'bg-[#142316] hover:bg-[#1a301d]',
-        timeText: 'text-teal-300'
+        timeText: 'text-teal-300',
+        writingArea: 'bg-[#0c130d]'
       }
     },
     ocean: {
@@ -110,13 +118,15 @@ const SelfDiary = () => {
         border: 'border-blue-200',
         button: 'bg-gradient-to-r from-blue-500 to-indigo-500',
         text: 'text-blue-900',
+        secondaryText: 'text-blue-700',
         placeholder: 'placeholder-blue-300',
         focus: 'ring-blue-300',
         sidebar: 'bg-[#e6efff]',
         nav: 'bg-white/80',
         modal: 'bg-white',
         entryCard: 'bg-white hover:bg-blue-50',
-        timeText: 'text-indigo-600'
+        timeText: 'text-indigo-600',
+        writingArea: 'bg-[#f5f9ff]'
       },
       dark: {
         bg: 'from-[#0f1520] to-[#141d2e]',
@@ -124,13 +134,15 @@ const SelfDiary = () => {
         border: 'border-blue-900',
         button: 'bg-gradient-to-r from-blue-600 to-indigo-600',
         text: 'text-blue-100',
+        secondaryText: 'text-blue-200',
         placeholder: 'placeholder-blue-700',
         focus: 'ring-blue-600',
         sidebar: 'bg-[#0c101a]',
         nav: 'bg-[#0c101a]/80',
         modal: 'bg-[#0c101a]',
         entryCard: 'bg-[#141d2e] hover:bg-[#1a2540]',
-        timeText: 'text-indigo-300'
+        timeText: 'text-indigo-300',
+        writingArea: 'bg-[#0c101a]'
       }
     }
   };
@@ -181,15 +193,7 @@ const SelfDiary = () => {
       <nav className={`fixed top-0 left-0 right-0 ${currentTheme.nav} backdrop-blur-md z-50 border-b ${currentTheme.border} shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <motion.button
-              onClick={() => navigate('/comfort-space')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2"
-            >
-              <span className={`text-xl font-semibold ${currentTheme.text}`}>ELARIA</span>
-              <FiHome className={`w-5 h-5 ${currentTheme.text}`} />
-            </motion.button>
+            <div className="flex-1"></div> {/* Empty div for balance */}
             
             <div className="flex items-center space-x-4">
               <motion.button
@@ -211,6 +215,16 @@ const SelfDiary = () => {
               >
                 <FiSettings className="w-5 h-5" />
               </motion.button>
+
+              <motion.button
+                onClick={() => navigate('/comfort-space')}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`p-2 rounded-full ${currentTheme.text}`}
+                aria-label="Home"
+              >
+                <FiHome className="w-5 h-5" />
+              </motion.button>
             </div>
           </div>
         </div>
@@ -226,7 +240,7 @@ const SelfDiary = () => {
             className={`fixed right-4 top-16 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
           >
             <div className="py-1">
-              <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border}`}>
+              <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
                 Theme Options
               </div>
               {Object.keys(themes).map((t) => (
@@ -257,7 +271,7 @@ const SelfDiary = () => {
         >
           <h2 className={`text-3xl font-bold mb-4 ${currentTheme.text}`}>Your Letters</h2>
           {savedEntries.length === 0 ? (
-            <p className={`${currentTheme.text}/70 italic`}>No letters saved yet.</p>
+            <p className={`${currentTheme.secondaryText} italic`}>No letters saved yet.</p>
           ) : (
             savedEntries.map((entry, idx) => (
               <motion.div
@@ -291,19 +305,19 @@ const SelfDiary = () => {
 
         {/* Main writing area */}
         <motion.div 
-          className={`flex-1 flex flex-col items-center justify-start p-6 ${darkMode ? 'bg-[#1a120e]' : 'bg-[url("https://www.transparenttextures.com/patterns/notebook.png")]'} bg-cover`}
+          className={`flex-1 flex flex-col items-center justify-start p-6 ${currentTheme.writingArea} overflow-y-auto rounded-r-2xl`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
           <motion.div 
-            className={`rounded-2xl shadow-xl p-8 max-w-3xl w-full border ${currentTheme.border} backdrop-blur-sm ${currentTheme.card}`}
+            className={`rounded-2xl shadow-xl p-8 max-w-3xl w-full ${currentTheme.card} border ${currentTheme.border}`}
             whileHover={{ scale: 1.005 }}
           >
             <h1 className={`text-5xl text-center font-bold mb-6 ${currentTheme.text} font-['Caveat']`}>
               Dear Me,
             </h1>
-            <p className={`text-center mb-6 text-lg ${currentTheme.text}/80`}>
+            <p className={`text-center mb-6 text-lg ${currentTheme.secondaryText}`}>
               This is your private diary. Speak your heart without fear.
             </p>
 
@@ -311,7 +325,7 @@ const SelfDiary = () => {
               value={entry}
               onChange={(e) => setEntry(e.target.value)}
               placeholder="Write your letter here..."
-              className={`w-full h-64 p-5 text-xl ${darkMode ? 'bg-gray-900/30' : 'bg-[#fffdf6]'} border ${currentTheme.border} rounded-xl shadow-inner resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} font-['Caveat'] leading-relaxed ${currentTheme.text} ${currentTheme.placeholder}`}
+              className={`w-full h-64 p-5 text-xl ${darkMode ? 'bg-gray-900/30' : 'bg-white/90'} border ${currentTheme.border} rounded-xl shadow-inner resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} font-['Caveat'] leading-relaxed ${currentTheme.text} ${currentTheme.placeholder}`}
             />
 
             <div className="text-center mt-6">

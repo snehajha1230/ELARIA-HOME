@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaMoon, FaSun } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaHome } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -83,10 +83,11 @@ const QuietLibrary = () => {
             </div>
             
             <button 
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => navigate('/comfort-space')}
               className="p-2 rounded-full bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-gray-600 transition"
+              aria-label="Go to comfort space"
             >
-              {darkMode ? <FaSun /> : <FaMoon />}
+              <FaHome />
             </button>
           </div>
         </header>

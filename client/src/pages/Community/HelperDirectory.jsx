@@ -208,12 +208,12 @@ const HelperDirectory = () => {
                 </div>
 
                 <div className="px-5 pb-5 flex flex-col space-y-2">
-                  <button
+                  {/* <button
                     onClick={() => navigate(`/helper/${helper._id}`)}
                     className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg text-sm font-medium transition"
                   >
                     View Profile
-                  </button>
+                  </button> */}
                   {helper.available && (
                     <button
                       onClick={() => {

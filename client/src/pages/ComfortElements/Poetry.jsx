@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
-import { X, Plus, BookOpen, Search, Moon, Sun } from 'lucide-react';
+import { X, Plus, BookOpen, Search, Home } from 'lucide-react';
 
 const Poetry = () => {
   const [poems, setPoems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
   const fetchPoems = async () => {
@@ -45,23 +44,12 @@ const Poetry = () => {
 
   useEffect(() => {
     fetchPoems();
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
   }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
 
   const handleAddClick = () => navigate('/add-poem');
 
   return (
-    <div className={`min-h-screen bg-fixed bg-center py-8 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-[#f9f5f0]'}`}>
+    <div className={`min-h-screen bg-fixed bg-center py-8 px-4 bg-[#f9f5f0] dark:bg-gray-900`}>
       {/* Paper Texture Background */}
       <div className={`fixed inset-0 bg-[url('/paper-texture.png')] bg-repeat opacity-15 dark:opacity-10 pointer-events-none z-0`}></div>
       
@@ -87,10 +75,10 @@ const Poetry = () => {
             </div>
             
             <button 
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => navigate('/comfort-space')}
               className="p-2 rounded-full bg-rose-100 dark:bg-gray-700 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-gray-600 transition"
             >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              <Home size={20} />
             </button>
           </div>
         </header>

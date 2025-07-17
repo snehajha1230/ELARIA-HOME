@@ -26,17 +26,14 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// Socket.IO Setup
+// Socket.IO Setup (Fixed Config)
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true
   },
-  connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000,
-    skipMiddlewares: true
-  }
+  // Removed connectionStateRecovery (causes issues with manual reconnects)
 });
 
 // Middleware
@@ -49,7 +46,7 @@ app.use(express.json());
 // Log CORS origin
 console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:5173');
 
-// Socket.IO Events
+// Socket.IO Events (Fixed Handlers)
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
@@ -61,25 +58,24 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Chat room join
-  socket.on('joinChat', ({ chatId }) => {
+  // Chat room join (Flexible payload handling)
+  socket.on('joinChat', (data) => {
+    const chatId = data.chatId || data; // Supports both { chatId } and raw string
     if (chatId) {
       socket.join(`chat-${chatId}`);
       console.log(`Socket ${socket.id} joined chat room: chat-${chatId}`);
     }
   });
 
-  // Chat message broadcast
+  // Chat message broadcast (Fixed: uses io.to() to include sender)
   socket.on('sendMessage', ({ chatId, message }) => {
     if (chatId && message) {
-      socket.to(`chat-${chatId}`).emit('newMessage', {
-        chatId,
-        message
-      });
-      console.log(`Message broadcasted to chat-${chatId}`);
+      io.to(`chat-${chatId}`).emit('newMessage', { chatId, message }); // Broadcast to ALL in room
+      console.log(`Message broadcasted to chat-${chatId}:`, message);
     }
   });
 
+  // Error and disconnect handlers
   socket.on('disconnect', (reason) => {
     console.log(`Socket disconnected (${socket.id}): ${reason}`);
   });
@@ -114,7 +110,4 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Export io
 export { io };
-
-

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaTrash, FaMusic, FaSearch, FaMoon, FaSun, FaPlay } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaMusic, FaSearch, FaHome, FaPlay } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -7,7 +7,10 @@ import { toast } from 'react-toastify';
 const SoundCorner = () => {
   const [tracks, setTracks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem('darkMode') === 'true' || 
+    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
   const navigate = useNavigate();
 
   const fetchTracks = async () => {
@@ -43,8 +46,11 @@ const SoundCorner = () => {
 
   useEffect(() => {
     fetchTracks();
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
+    // Initialize dark mode from localStorage or system preference
+    if (localStorage.getItem('darkMode') === null) {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
+      localStorage.setItem('darkMode', prefersDark);
     }
   }, []);
 
@@ -57,47 +63,46 @@ const SoundCorner = () => {
   }, [darkMode]);
 
   return (
-    <div className={`min-h-screen bg-fixed bg-center py-8 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-[#f5f1e6]'}`}>
-      {/* Wooden Shelf Background */}
-      <div className={`fixed inset-0 bg-[url('/wooden-shelf-texture.png')] bg-repeat opacity-10 dark:opacity-5 pointer-events-none z-0`}></div>
-      
+    <div className={`min-h-screen bg-gradient-to-br from-gray-900 to-purple-900 dark:from-gray-900 dark:to-gray-800 py-8 px-4 transition-colors duration-300`}>
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header with Navigation */}
-        <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-amber-100 dark:border-gray-700">
+        <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/10 dark:bg-gray-800/90 shadow-lg border border-purple-300/20">
           <div className="flex items-center mb-4 md:mb-0">
-            <FaMusic className="text-3xl mr-3 text-amber-600 dark:text-amber-400" />
-            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">Sound Corner</h1>
+            <FaMusic className="text-3xl mr-3 text-purple-400" />
+            <h1 className="text-4xl font-serif font-bold text-purple-100">Sound Sanctuary</h1>
           </div>
           
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <FaSearch className="absolute left-3 top-3 text-gray-500" />
+              <FaSearch className="absolute left-3 top-3 text-purple-300" />
               <input
                 type="text"
                 placeholder="Search your tracks..."
-                className="pl-10 pr-4 py-2 rounded-full bg-white dark:bg-gray-700 border border-amber-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                className="pl-10 pr-4 py-2 rounded-full bg-white/10 dark:bg-gray-700 border border-purple-300/30 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-500 text-purple-100 placeholder-purple-300/70"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
             <button 
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-gray-600 transition"
+              onClick={() => navigate('/comfort-space')}
+              className="p-2 rounded-full bg-purple-600/30 dark:bg-gray-700 text-purple-200 dark:text-purple-300 hover:bg-purple-700/40 dark:hover:bg-gray-600 transition"
+              title="Go to Comfort Space"
+              aria-label="Go to Comfort Space"
             >
-              {darkMode ? <FaSun /> : <FaMoon />}
+              <FaHome />
             </button>
           </div>
         </header>
 
         {/* Main Shelf Area */}
-        <main className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-amber-100 dark:border-gray-700">
+        <main className="bg-white/10 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-purple-300/20">
           {/* Add Track Button */}
           <div className="flex justify-end mb-8">
             <button
               onClick={() => navigate('/add-track')}
-              className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <FaPlus />
               <span>Add to My Collection</span>
@@ -107,16 +112,20 @@ const SoundCorner = () => {
           {/* Tracks Grid */}
           {tracks.length === 0 ? (
             <div className="text-center py-16">
-              <img src="/empty-music.svg" alt="No tracks" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your sound corner is silent... 🎵</p>
-              <p className="text-sm text-gray-400">Add your favorite tracks to fill it with melody.</p>
+              <div className="mx-auto w-56 opacity-80 flex justify-center text-purple-300">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-56 w-56" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+              <p className="mt-6 text-xl text-purple-200">Your sound sanctuary is silent... 🎵</p>
+              <p className="text-sm text-purple-300/80">Add your favorite tracks to fill it with melody.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredTracks.map((track) => (
                 <div
                   key={track._id}
-                  className="relative group bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-amber-100 dark:border-gray-600 hover:border-amber-300 dark:hover:border-amber-500"
+                  className="relative group bg-white/10 dark:bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-purple-300/20 dark:border-gray-600 hover:border-purple-400/50 dark:hover:border-purple-500"
                 >
                   {/* Track Cover */}
                   <div className="relative h-64 overflow-hidden">
@@ -131,7 +140,7 @@ const SoundCorner = () => {
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div className="w-full h-full bg-purple-900/20 dark:bg-purple-900/50 flex items-center justify-center text-purple-300 dark:text-purple-400">
                         <FaMusic className="text-4xl" />
                       </div>
                     )}
@@ -140,7 +149,7 @@ const SoundCorner = () => {
                         href={track.trackUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-amber-500/90 hover:bg-amber-600 text-white p-4 rounded-full shadow-xl"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-purple-600/90 hover:bg-purple-700 text-white p-4 rounded-full shadow-xl"
                       >
                         <FaPlay size={20} />
                       </a>
@@ -148,26 +157,26 @@ const SoundCorner = () => {
                   </div>
 
                   {/* Track Details */}
-                  <div className="p-5 bg-white dark:bg-gray-700">
-                    <h3 className="text-lg font-serif font-bold text-gray-800 dark:text-gray-100 mb-1 line-clamp-1">
+                  <div className="p-5 bg-white/5 dark:bg-gray-700">
+                    <h3 className="text-lg font-serif font-bold text-purple-100 dark:text-gray-100 mb-1 line-clamp-1">
                       {track.title}
                     </h3>
                     {track.artist && (
-                      <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-3 line-clamp-1">
+                      <p className="text-sm text-purple-200 dark:text-gray-300 italic mb-3 line-clamp-1">
                         by {track.artist}
                       </p>
                     )}
                     {track.album && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-1">
+                      <p className="text-xs text-purple-300/80 dark:text-gray-400 mb-3 line-clamp-1">
                         {track.album}
                       </p>
                     )}
                     <div className="flex justify-between items-center">
-                      <span className="inline-block bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-3 py-1 text-xs rounded-full">
+                      <span className="inline-block bg-purple-900/30 dark:bg-purple-900 text-purple-200 dark:text-purple-200 px-3 py-1 text-xs rounded-full">
                         {track.genre || 'Various'}
                       </span>
                       {track.duration && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-purple-300/80 dark:text-gray-400">
                           {track.duration}
                         </span>
                       )}
@@ -191,7 +200,7 @@ const SoundCorner = () => {
         </main>
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <footer className="mt-8 text-center text-sm text-purple-300/80 dark:text-gray-400">
           <p>Your personal music sanctuary • {tracks.length} tracks in your collection</p>
           <p className="mt-1">"Where words fail, music speaks." — Hans Christian Andersen</p>
         </footer>

@@ -36,7 +36,7 @@ const LandingPage = () => {
               onClick={handleExplore}
               className="bg-white text-black border border-black hover:bg-black hover:text-white px-6 py-3 text-sm uppercase tracking-wide font-medium transition-all duration-300 shadow hover:scale-105"
             >
-              Explore
+              About
             </button>
             <button
               onClick={handleGetStarted}

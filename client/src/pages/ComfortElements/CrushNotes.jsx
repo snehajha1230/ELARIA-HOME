@@ -27,6 +27,7 @@ const CrushNotes = () => {
         border: 'border-orange-200',
         button: 'bg-gradient-to-r from-orange-500 to-pink-500',
         text: 'text-amber-900',
+        secondaryText: 'text-amber-700',
         placeholder: 'placeholder-amber-300',
         focus: 'ring-orange-300',
         crushed: 'text-amber-600',
@@ -38,6 +39,7 @@ const CrushNotes = () => {
         border: 'border-orange-900',
         button: 'bg-gradient-to-r from-orange-600 to-pink-600',
         text: 'text-amber-100',
+        secondaryText: 'text-amber-200',
         placeholder: 'placeholder-amber-700',
         focus: 'ring-orange-600',
         crushed: 'text-amber-400',
@@ -51,6 +53,7 @@ const CrushNotes = () => {
         border: 'border-emerald-200',
         button: 'bg-gradient-to-r from-emerald-500 to-teal-500',
         text: 'text-emerald-900',
+        secondaryText: 'text-emerald-700',
         placeholder: 'placeholder-emerald-300',
         focus: 'ring-emerald-300',
         crushed: 'text-emerald-600',
@@ -62,6 +65,7 @@ const CrushNotes = () => {
         border: 'border-emerald-900',
         button: 'bg-gradient-to-r from-emerald-600 to-teal-600',
         text: 'text-emerald-100',
+        secondaryText: 'text-emerald-200',
         placeholder: 'placeholder-emerald-700',
         focus: 'ring-emerald-600',
         crushed: 'text-emerald-400',
@@ -75,6 +79,7 @@ const CrushNotes = () => {
         border: 'border-blue-200',
         button: 'bg-gradient-to-r from-blue-500 to-indigo-500',
         text: 'text-blue-900',
+        secondaryText: 'text-blue-700',
         placeholder: 'placeholder-blue-300',
         focus: 'ring-blue-300',
         crushed: 'text-blue-600',
@@ -86,6 +91,7 @@ const CrushNotes = () => {
         border: 'border-blue-900',
         button: 'bg-gradient-to-r from-blue-600 to-indigo-600',
         text: 'text-blue-100',
+        secondaryText: 'text-blue-200',
         placeholder: 'placeholder-blue-700',
         focus: 'ring-blue-600',
         crushed: 'text-blue-400',
@@ -116,15 +122,7 @@ const CrushNotes = () => {
       <nav className={`fixed top-0 left-0 right-0 ${currentTheme.nav} backdrop-blur-md z-50 border-b ${currentTheme.border} shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <motion.button
-              onClick={() => navigate('/comfort-space')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2"
-            >
-              <span className={`text-xl font-semibold ${currentTheme.text}`}>ELARIA</span>
-              <FiHome className={`w-5 h-5 ${currentTheme.text}`} />
-            </motion.button>
+            <div className="flex-1"></div> {/* Empty div for balance */}
             
             <div className="flex items-center space-x-4">
               <motion.button
@@ -146,6 +144,16 @@ const CrushNotes = () => {
               >
                 <FiSettings className="w-5 h-5" />
               </motion.button>
+
+              <motion.button
+                onClick={() => navigate('/comfort-space')}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`p-2 rounded-full ${currentTheme.text}`}
+                aria-label="Home"
+              >
+                <FiHome className="w-5 h-5" />
+              </motion.button>
             </div>
           </div>
         </div>
@@ -161,7 +169,7 @@ const CrushNotes = () => {
             className={`fixed right-4 top-16 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
           >
             <div className="py-1">
-              <div className="px-4 py-2 text-sm font-medium border-b border-gray-200 dark:border-gray-700">
+              <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
                 Theme Options
               </div>
               {Object.keys(themes).map((t) => (
@@ -212,26 +220,26 @@ const CrushNotes = () => {
         </div>
 
         <motion.div 
-          className={`w-full max-w-2xl mx-auto ${currentTheme.card} rounded-3xl shadow-lg backdrop-blur-sm p-6 md:p-10 border ${currentTheme.border} transition-all duration-300 ${isWriting ? 'scale-[1.01]' : ''}`}
+          className={`w-full max-w-4xl mx-auto ${currentTheme.card} rounded-3xl shadow-lg backdrop-blur-sm p-8 md:p-12 border ${currentTheme.border} transition-all duration-300 ${isWriting ? 'scale-[1.01]' : ''}`}
           whileHover={{ scale: 1.005 }}
         >
           <motion.div 
-            className="text-center mb-8"
+            className="text-center mb-10"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className={`text-3xl md:text-4xl font-medium ${currentTheme.text} mb-3`}>
+            <h1 className={`text-4xl md:text-5xl font-medium ${currentTheme.text} mb-4`}>
               Your Personal Release Space
             </h1>
-            <p className={`text-lg ${currentTheme.text}/80`}>
+            <p className={`text-xl ${currentTheme.secondaryText}`}>
               {isWriting 
                 ? "Keep going, we're listening..." 
                 : "What's on your mind today?"}
             </p>
           </motion.div>
 
-          <div className="relative min-h-[220px]">
+          <div className="relative min-h-[300px]">
             <AnimatePresence mode="wait">
               {!crushed ? (
                 <motion.div
@@ -242,7 +250,7 @@ const CrushNotes = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <motion.textarea
-                    className={`w-full h-52 p-5 text-lg rounded-xl border ${currentTheme.border} resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} ${darkMode ? 'bg-gray-900/30' : 'bg-white/70'} ${currentTheme.placeholder} transition-all duration-200 ${currentTheme.text}`}
+                    className={`w-full h-80 p-6 text-lg rounded-xl border ${currentTheme.border} resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} ${darkMode ? 'bg-gray-900/30' : 'bg-white/70'} ${currentTheme.placeholder} transition-all duration-200 ${currentTheme.text}`}
                     placeholder="Write freely... this is just for you"
                     value={note}
                     onChange={(e) => {
@@ -253,7 +261,7 @@ const CrushNotes = () => {
                     onBlur={() => setIsWriting(note.length > 0)}
                   />
                   <motion.div 
-                    className={`text-right mt-2 text-sm ${currentTheme.text}/60`}
+                    className={`text-right mt-2 text-sm ${currentTheme.secondaryText}`}
                     animate={{ opacity: note.length > 0 ? 1 : 0.5 }}
                   >
                     {note.length}
@@ -265,7 +273,7 @@ const CrushNotes = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center justify-center h-52"
+                  className="flex flex-col items-center justify-center h-80"
                 >
                   <motion.div
                     animate={{ 
@@ -289,7 +297,7 @@ const CrushNotes = () => {
                     Released with care
                   </motion.p>
                   <motion.p 
-                    className={`mt-2 ${currentTheme.text}/70`}
+                    className={`mt-2 ${currentTheme.secondaryText}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8 }}
@@ -302,7 +310,7 @@ const CrushNotes = () => {
           </div>
 
           <motion.div 
-            className="mt-8 flex justify-center"
+            className="mt-10 flex justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -310,7 +318,7 @@ const CrushNotes = () => {
             <motion.button
               onClick={handleCrush}
               disabled={note.trim().length === 0}
-              className={`${currentTheme.button} text-white px-8 py-3 rounded-full text-sm uppercase tracking-widest font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${currentTheme.button} text-white px-10 py-4 rounded-full text-sm uppercase tracking-widest font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
               whileHover={note.trim().length > 0 ? { scale: 1.05 } : {}}
               whileTap={note.trim().length > 0 ? { scale: 0.95 } : {}}
             >
@@ -319,9 +327,9 @@ const CrushNotes = () => {
           </motion.div>
 
           <motion.div 
-            className={`mt-8 text-sm ${currentTheme.text}/50 text-center`}
+            className={`mt-8 text-sm ${currentTheme.secondaryText} text-center`}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{ opacity: 0.8 }}
             transition={{ delay: 1 }}
           >
             Your words disappear forever when released
@@ -330,9 +338,9 @@ const CrushNotes = () => {
 
         {/* Personal touch - signature */}
         <motion.div 
-          className={`absolute bottom-4 left-0 right-0 text-center ${currentTheme.text}/50 text-sm`}
+          className={`absolute bottom-4 left-0 right-0 text-center ${currentTheme.secondaryText} text-sm`}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.6 }}
+          animate={{ opacity: 0.8 }}
           transition={{ delay: 1.5 }}
         >
           Made with care

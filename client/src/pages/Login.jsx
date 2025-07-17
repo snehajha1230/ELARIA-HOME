@@ -40,7 +40,7 @@ const Login = () => {
       {/* Left Section – Message */}
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center p-10 text-center">
         <img
-          src="https://i.pinimg.com/736x/a6/4a/e0/a64ae073b6813f2548fec763bd5b18ac.jpg"
+          src="https://i.pinimg.com/736x/22/cb/8d/22cb8dd28f6b66a0c0ba5d2aff7a3f96.jpg"
           alt="Emotional support illustration"
           className="w-60 h-auto mb-6"
         />

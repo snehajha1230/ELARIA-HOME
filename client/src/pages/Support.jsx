@@ -22,12 +22,15 @@ import BreathingModal from '../components/BreathingModal';
 import SOSModal from '../components/SOSModal';
 import axios from '../utils/api';
 import { toast } from 'react-toastify';
+import Navbar from '../components/Navbar';
 
 const Support = () => {
   const navigate = useNavigate();
   const [showBreathing, setShowBreathing] = useState(false);
   const [showSOS, setShowSOS] = useState(false);
   const [activePath, setActivePath] = useState('discover');
+  const [darkMode, setDarkMode] = useState(false);
+  const user = JSON.parse(localStorage.getItem('user'));
 
   const handleSendSOS = async () => {
     try {
@@ -41,26 +44,14 @@ const Support = () => {
     }
   };
 
+  const toggleTheme = () => {
+    setDarkMode(prev => !prev);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f7fa] to-[#e4f2fd] dark:from-[#1a1a2e] dark:to-[#16213e] text-gray-800 dark:text-gray-100">
-      {/* Navbar */}
-      <nav className="bg-white/90 dark:bg-[#0f3460]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/home')}
-                className="flex items-center space-x-2 text-2xl font-bold text-[#5d78ff] dark:text-[#8a9bff]"
-              >
-                <FaHome className="text-[#5d78ff]" />
-                <span>ELARIA</span>
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Updated Navbar */}
+      <Navbar darkMode={darkMode} toggleTheme={toggleTheme} user={user} />
 
       {/* Organic Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -117,7 +108,7 @@ const Support = () => {
                 className="flex items-center space-x-2 px-4 py-2 bg-white/90 dark:bg-[#1e293b]/90 rounded-xl shadow-sm border border-[#e2e8f0] dark:border-[#334155] hover:shadow-md transition-all"
               >
                 <FaRegSmile className="text-[#f6ad55]" />
-                <span>Track Mood</span>
+                <span>Your Mood</span>
               </motion.button>
               
               <motion.button

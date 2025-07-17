@@ -4,14 +4,12 @@ import axios from '../../utils/api';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 
-// Loading spinner component
 const LoadingSpinner = ({ fullScreen = true }) => (
   <div className={`flex items-center justify-center ${fullScreen ? 'h-screen' : 'h-full'}`}>
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
 
-// Error display component
 const ErrorDisplay = ({ message, onRetry, onHome }) => {
   const navigate = useNavigate();
   return (
@@ -54,10 +52,11 @@ const ChatWindow = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Initialize socket connection
+  // Initialize socket connection (FIXED)
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
     const newSocket = io(socketUrl, {
+      path: '/socket.io',
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 3000,
@@ -71,17 +70,15 @@ const ChatWindow = () => {
 
     // Connection events
     newSocket.on('connect', () => {
+      console.log('Socket connected');
       setIsConnected(true);
-      const userId = localStorage.getItem('userId');
-      if (userId && chatId) {
-        newSocket.emit('joinChat', { 
-          chatId, 
-          userId 
-        });
+      if (chatId) {
+        newSocket.emit('joinChat', { chatId }); // FIXED: Removed userId
       }
     });
 
     newSocket.on('disconnect', () => {
+      console.log('Socket disconnected');
       setIsConnected(false);
       toast.warn('Connection lost. Reconnecting...');
     });
@@ -91,11 +88,17 @@ const ChatWindow = () => {
       toast.error(`Connection error: ${err.message}`);
     });
 
-    // Message handling
+    // Message handling (FIXED)
     newSocket.on('newMessage', (data) => {
+      console.log('Received message:', data);
       if (data.chatId === chatId) {
         setMessages(prev => {
-          const exists = prev.some(m => m._id === data.message._id);
+          // Check for duplicates using multiple fields
+          const exists = prev.some(m => 
+            m._id === data.message._id || 
+            (m.isTemp && m.content === data.message.content && 
+             m.sender._id === data.message.sender._id)
+          );
           return exists ? prev : [...prev, {
             ...data.message,
             isOwn: data.message.sender._id === localStorage.getItem('userId')
@@ -121,17 +124,10 @@ const ChatWindow = () => {
       }
     });
 
-    // Notification handler
-    newSocket.on('newMessageNotification', (data) => {
-      if (data.chatId === chatId) {
-        toast.info(`New message from ${data.senderName}: ${data.preview}`);
-      }
-    });
-
     setSocket(newSocket);
 
     return () => {
-      if (chatId) {
+      if (chatId && newSocket.connected) {
         newSocket.emit('leaveChat', chatId);
       }
       newSocket.disconnect();
@@ -182,24 +178,25 @@ const ChatWindow = () => {
       socket.emit('typing', {
         chatId,
         userId: localStorage.getItem('userId'),
-        userName: 'You' // Or fetch actual username
+        userName: 'You'
       });
     }
   }, [socket, isConnected, chatId]);
 
-  // Send message handler
+  // Send message handler (FIXED)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !chatId || !isConnected) return;
 
-    const tempId = Date.now().toString();
+    const tempId = `temp-${Date.now()}`;
     const currentUserId = localStorage.getItem('userId');
     const tempMessage = {
       _id: tempId,
       content: newMessage,
       sender: { _id: currentUserId, name: 'You' },
       timestamp: new Date(),
-      isOwn: true
+      isOwn: true,
+      isTemp: true
     };
 
     // Optimistic update
@@ -207,10 +204,15 @@ const ChatWindow = () => {
     setNewMessage('');
 
     try {
-      await axios.post(`/chat/${chatId}/messages`, {
+      const res = await axios.post(`/chat/${chatId}/messages`, {
         content: newMessage,
         sender: currentUserId
       });
+
+      // Replace temp message with server response
+      setMessages(prev => prev.map(m => 
+        m._id === tempId ? { ...res.data.data, isOwn: true } : m
+      ));
     } catch (err) {
       // Rollback on error
       setMessages(prev => prev.filter(m => m._id !== tempId));
@@ -265,7 +267,7 @@ const ChatWindow = () => {
               {chatSession.participants
                 .filter(p => p._id !== localStorage.getItem('userId'))
                 .map(p => p.name)
-                .join(', ')}
+                .join(' and ')}
             </h2>
           </div>
           <div className="flex items-center space-x-2">

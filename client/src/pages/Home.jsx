@@ -48,7 +48,7 @@ const Home = () => {
       subtitle: 'Real people ready to listen',
       description:
         'Connect with compassionate listeners in our candlelit digital space. Share as much or as little as you need - no pressure, just presence.',
-      image: 'https://images.unsplash.com/photo-1604881991720-f91add269bed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80',
+      image: 'https://i.pinimg.com/736x/74/33/2d/74332da120f08669aa0478c20c0eb861.jpg',
       icon: <Shield className="w-6 h-6" />,
       color: 'from-blue-100 to-blue-50',
       darkColor: 'from-blue-900/20 to-blue-900/40',
@@ -60,7 +60,7 @@ const Home = () => {
       subtitle: 'Gentle conversation anytime',
       description:
         'Our AI companion speaks in soft tones, remembers your favorite tea, and creates a space where you can simply be.',
-      image: 'https://images.unsplash.com/photo-1507146426996-ef05306b995a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+      image: 'https://i.pinimg.com/1200x/28/ab/29/28ab29f1afe5877f21bc8e3fd08687f3.jpg',
       icon: <Coffee className="w-6 h-6" />,
       color: 'from-violet-100 to-violet-50',
       darkColor: 'from-violet-900/20 to-violet-900/40',
@@ -221,7 +221,7 @@ const Home = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Come in, <span className="text-amber-600 dark:text-amber-400">get cozy</span>
+            Come in, <span className="text-amber-600 dark:text-amber-400">Be Comfortable</span>
           </motion.h1>
 
           <motion.p 

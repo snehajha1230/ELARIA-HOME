@@ -45,7 +45,7 @@ const Signup = () => {
       {/* Left Section – Uplifting Message */}
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center p-10 text-center">
         <img
-          src="https://i.pinimg.com/736x/b0/17/cb/b017cbec1c0b7d59207cce90482001e4.jpg"
+          src="https://i.pinimg.com/1200x/1f/c9/6d/1fc96d0070bfafe41bb28cb22c7f2376.jpg"
           alt="Supportive illustration"
           className="w-60 h-auto mb-6"
         />
