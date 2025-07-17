@@ -68,7 +68,7 @@ const AddMedia = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                   </svg>
                   <h2 className="text-3xl font-bold font-serif text-blue-100">
-                    Comfort Cinema
+                    Screen Room
                   </h2>
                 </div>
                 <div className="w-16 h-1 bg-blue-400 mb-4"></div>
@@ -199,7 +199,7 @@ const AddMedia = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Add to Comfort Collection
+                      Add to Screen Room
                     </>
                   )}
                 </button>
@@ -214,7 +214,7 @@ const AddMedia = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back to Comfort Screen
+                Back to Screen Room
               </button>
             </div>
           </div>

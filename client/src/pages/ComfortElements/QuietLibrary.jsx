@@ -67,7 +67,7 @@ const QuietLibrary = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-amber-100 dark:border-gray-700">
           <div className="flex items-center mb-4 md:mb-0">
             <FaBookOpen className="text-3xl mr-3 text-amber-600 dark:text-amber-400" />
-            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">My Library</h1>
+            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">My Reading Room</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -101,15 +101,15 @@ const QuietLibrary = () => {
               className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <FaPlus />
-              <span>Add to My Collection</span>
+              <span>Add My Favourites</span>
             </button>
           </div>
 
           {/* Books Grid */}
           {books.length === 0 ? (
             <div className="text-center py-16">
-              <img src="/empty-shelf.svg" alt="No books" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your shelf is waiting for stories... 📖</p>
+              <img src="https://static.thenounproject.com/png/1433745-200.png" alt="No books" className="mx-auto w-56 opacity-80" />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your shelf is waiting for stories... </p>
               <p className="text-sm text-gray-400">Begin your collection with a book that speaks to your soul.</p>
             </div>
           ) : (
@@ -182,7 +182,7 @@ const QuietLibrary = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Your personal sanctuary of stories • {books.length} books in your collection</p>
+          <p>Your personal reading room of stories • {books.length} books in your collection</p>
           <p className="mt-1">"A room without books is like a body without a soul." — Cicero</p>
         </footer>
       </div>

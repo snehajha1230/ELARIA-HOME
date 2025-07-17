@@ -29,28 +29,28 @@ const ComfortSpace = () => {
     },
     {
       id: 'cinema',
-      name: 'Cinema',
+      name: 'Screen Room',
       icon: <FaFilm />,
       path: '/comfort-screen',
       position: { gridArea: '1 / 4 / 2 / 5' }, // Top-right room
     },
     {
       id: 'poetry',
-      name: 'Poetry Corner',
+      name: 'Poetry Room',
       icon: <FaPenFancy />,
       path: '/poetry',
       position: { gridArea: '2 / 1 / 3 / 2' }, // Left room
     },
     {
       id: 'library',
-      name: 'Library',
+      name: 'Reading Room',
       icon: <FaBook />,
       path: '/quiet-library',
       position: { gridArea: '2 / 5 / 3 / 6' }, // Right room
     },
     {
       id: 'release',
-      name: 'Release Corner',
+      name: 'Let-Go Space',
       icon: <FaTrashAlt />,
       path: '/crush-notes',
       position: { gridArea: '3 / 2 / 4 / 3' }, // Bottom-left room

@@ -50,7 +50,7 @@ const AddBook = () => {
             <div className="flex-1 flex flex-col justify-center">
               <div className="mb-8">
                 <h2 className="text-3xl font-serif font-bold text-amber-900 dark:text-amber-100 mb-2">
-                  Your Reading Sanctuary
+                  Your Reading Room
                 </h2>
                 <div className="w-16 h-1 bg-amber-700 dark:bg-amber-400 mb-4"></div>
                 <p className="text-amber-800 dark:text-amber-200 italic font-serif text-lg">
@@ -130,7 +130,7 @@ const AddBook = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
-                      Add to Your Library
+                      Add to Your Collection
                     </>
                   )}
                 </button>
@@ -145,7 +145,7 @@ const AddBook = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back to your library
+                Back to Reading Room
               </button>
             </div>
           </div>

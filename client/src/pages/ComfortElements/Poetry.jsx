@@ -59,7 +59,7 @@ const Poetry = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-rose-100 dark:border-gray-700">
           <div className="flex items-center mb-4 md:mb-0">
             <BookOpen className="text-3xl mr-3 text-rose-600 dark:text-rose-400" />
-            <h1 className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-200">Soulful Poetry</h1>
+            <h1 className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-200">Your Poetry Room</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -92,15 +92,15 @@ const Poetry = () => {
               className="flex items-center space-x-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Plus size={20} />
-              <span>Compose New Poem</span>
+              <span>Add My Favourites</span>
             </button>
           </div>
 
           {/* Poems Grid */}
           {poems.length === 0 ? (
             <div className="text-center py-16">
-              <img src="/empty-notebook.svg" alt="No poems" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your poetry journal awaits... ✍️</p>
+              <img src="https://cdn-icons-png.freepik.com/512/10559/10559032.png" alt="No poems" className="mx-auto w-56 opacity-80" />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your poetry journal awaits... </p>
               <p className="text-sm text-gray-400">Begin by adding your first heartfelt verse.</p>
             </div>
           ) : (
@@ -157,7 +157,7 @@ const Poetry = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Your personal poetry sanctuary • {poems.length} poems in your collection</p>
+          <p>Your personal poetry room • {poems.length} poems in your collection</p>
           <p className="mt-1">"Poetry is when an emotion has found its thought and the thought has found words." — Robert Frost</p>
         </footer>
       </div>

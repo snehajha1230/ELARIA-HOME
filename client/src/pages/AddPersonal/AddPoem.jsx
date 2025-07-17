@@ -59,7 +59,7 @@ const AddPoem = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <h2 className="text-3xl font-serif font-bold text-rose-100">
-                    Whispered Verses
+                    Poetry Room
                   </h2>
                 </div>
                 <div className="w-16 h-1 bg-rose-400 mb-4"></div>
@@ -87,7 +87,7 @@ const AddPoem = () => {
             
             <div className="relative z-10 mt-auto pt-4 border-t border-rose-700/50">
               <p className="text-xs text-rose-300/80">
-                <span className="font-semibold">Note:</span> Your contributions help build a sanctuary of shared emotions.
+                <span className="font-semibold">Note:</span> Your collection becomes a personalized auditory retreat.
               </p>
             </div>
           </div>
@@ -184,7 +184,7 @@ const AddPoem = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Return to Poetry Garden
+                Return to Poetry Room
               </button>
             </div>
           </div>

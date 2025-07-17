@@ -63,7 +63,7 @@ const ComfortScreen = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-blue-100 dark:border-gray-700">
           <div className="flex items-center mb-4 md:mb-0">
             <FaFilm className="text-3xl mr-3 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-4xl font-serif font-bold text-blue-800 dark:text-blue-200">Comfort Screen</h1>
+            <h1 className="text-4xl font-serif font-bold text-blue-800 dark:text-blue-200">Your Screen Room</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -96,15 +96,15 @@ const ComfortScreen = () => {
               className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <FaPlus />
-              <span>Add to My Collection</span>
+              <span>Add My Favourites</span>
             </button>
           </div>
 
           {/* Media Grid */}
           {mediaList.length === 0 ? (
             <div className="text-center py-16">
-              <img src="/empty-screen.svg" alt="No media" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your comfort screen is empty... 🎬</p>
+              <img src="https://cdn-icons-png.flaticon.com/512/3875/3875391.png" alt="No media" className="mx-auto w-56 opacity-80" />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your Screen Room is empty... 🎬</p>
               <p className="text-sm text-gray-400">Add your favorite movies, shows or videos to relax with.</p>
             </div>
           ) : (
@@ -178,7 +178,7 @@ const ComfortScreen = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Your personal comfort collection • {mediaList.length} items to relax with</p>
+          <p>Your personal screen room • {mediaList.length} items to relax with</p>
           <p className="mt-1">"Movies can and do have tremendous influence in shaping young lives." — Walt Disney</p>
         </footer>
       </div>

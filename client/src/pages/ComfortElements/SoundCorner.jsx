@@ -70,7 +70,7 @@ const SoundCorner = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/10 dark:bg-gray-800/90 shadow-lg border border-purple-300/20">
           <div className="flex items-center mb-4 md:mb-0">
             <FaMusic className="text-3xl mr-3 text-purple-400" />
-            <h1 className="text-4xl font-serif font-bold text-purple-100">Sound Sanctuary</h1>
+            <h1 className="text-4xl font-serif font-bold text-purple-100">Your Music Room</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -105,7 +105,7 @@ const SoundCorner = () => {
               className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <FaPlus />
-              <span>Add to My Collection</span>
+              <span>Add My Favourites</span>
             </button>
           </div>
 
@@ -117,7 +117,7 @@ const SoundCorner = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
-              <p className="mt-6 text-xl text-purple-200">Your sound sanctuary is silent... 🎵</p>
+              <p className="mt-6 text-xl text-purple-200">Your music room is silent... 🎵</p>
               <p className="text-sm text-purple-300/80">Add your favorite tracks to fill it with melody.</p>
             </div>
           ) : (
@@ -201,7 +201,7 @@ const SoundCorner = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-purple-300/80 dark:text-gray-400">
-          <p>Your personal music sanctuary • {tracks.length} tracks in your collection</p>
+          <p>Your personal music room • {tracks.length} tracks in your collection</p>
           <p className="mt-1">"Where words fail, music speaks." — Hans Christian Andersen</p>
         </footer>
       </div>
