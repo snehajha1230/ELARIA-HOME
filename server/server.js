@@ -29,7 +29,7 @@ const httpServer = createServer(app);
 // Socket.IO Setup (with proper CORS)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com',
     methods: ['GET', 'POST'],
     credentials: true
   },
@@ -37,13 +37,13 @@ const io = new Server(httpServer, {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com',
   credentials: true
 }));
 app.use(express.json());
 
 // Log CORS origin
-console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:5173');
+console.log('CORS allowed origin:', process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com');
 
 // === Socket.IO Events ===
 io.on('connection', (socket) => {
