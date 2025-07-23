@@ -12,7 +12,7 @@ const Signup = () => {
     password: ''
   });
 
-  const { login } = useAuth(); // ✅
+  const { login } = useAuth(); 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,7 +22,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', {
+      const res = await axios.post('https://elaria-server.onrender.com/api/auth/signup', {
         username: formData.username,
         age: formData.age,
         email: formData.email,
