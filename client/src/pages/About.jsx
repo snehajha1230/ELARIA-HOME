@@ -271,7 +271,7 @@ const AboutPage = () => {
               }} 
               whileTap={{ scale: 0.98 }} 
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-medium text-lg shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden"
-              onClick={() => window.location.href = '/signup'}
+              onClick={() => navigate('/signup')}
             >
               <span className="relative z-10">Begin Your Journey</span>
               <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 hover:opacity-100 transition-opacity duration-300"></span>
