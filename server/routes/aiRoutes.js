@@ -1,8 +1,9 @@
 import express from 'express';
-import { talkToAi } from '../controllers/aiController.js';
+import { handleTextAI } from '../controllers/aiController.js';
 
 const router = express.Router();
 
-router.post('/talk', talkToAi);
+router.post('/text', handleTextAI);
 
 export default router;
+

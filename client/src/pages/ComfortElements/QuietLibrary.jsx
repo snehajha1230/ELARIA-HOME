@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaHome } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaHome, FaExternalLinkAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -130,6 +130,20 @@ const QuietLibrary = () => {
                         e.target.src = '/default-book-cover.jpg';
                       }}
                     />
+                    {/* Book URL Link */}
+                    {book.bookUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+                        <a
+                          href={book.bookUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-4 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FaExternalLinkAlt size={24} />
+                        </a>
+                      </div>
+                    )}
                     {/* Reading Progress */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-600">
                       <div 

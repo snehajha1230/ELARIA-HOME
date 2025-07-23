@@ -1,15 +1,18 @@
+// ChatWindow.jsx
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 
+// Loading spinner component
 const LoadingSpinner = ({ fullScreen = true }) => (
   <div className={`flex items-center justify-center ${fullScreen ? 'h-screen' : 'h-full'}`}>
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
 
+// Error display component
 const ErrorDisplay = ({ message, onRetry, onHome }) => {
   const navigate = useNavigate();
   return (
@@ -52,7 +55,6 @@ const ChatWindow = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Initialize socket connection (FIXED)
   useEffect(() => {
     const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
     const newSocket = io(socketUrl, {
@@ -68,12 +70,11 @@ const ChatWindow = () => {
       }
     });
 
-    // Connection events
     newSocket.on('connect', () => {
       console.log('Socket connected');
       setIsConnected(true);
       if (chatId) {
-        newSocket.emit('joinChat', { chatId }); // FIXED: Removed userId
+        newSocket.emit('joinChat', { chatId });
       }
     });
 
@@ -88,35 +89,45 @@ const ChatWindow = () => {
       toast.error(`Connection error: ${err.message}`);
     });
 
-    // Message handling (FIXED)
+    // ✅ FIXED LOGIC BELOW (deduplicates optimistic messages)
     newSocket.on('newMessage', (data) => {
       console.log('Received message:', data);
       if (data.chatId === chatId) {
+        const userId = localStorage.getItem('userId');
+
         setMessages(prev => {
-          // Check for duplicates using multiple fields
-          const exists = prev.some(m => 
-            m._id === data.message._id || 
-            (m.isTemp && m.content === data.message.content && 
-             m.sender._id === data.message.sender._id)
+          const isDuplicate = prev.some(m =>
+            m._id === data.message._id ||
+            (m.isTemp &&
+              m.content === data.message.content &&
+              m.sender._id === data.message.sender._id)
           );
-          return exists ? prev : [...prev, {
+
+          if (isDuplicate) {
+            return prev.map(m =>
+              m.isTemp &&
+              m.content === data.message.content &&
+              m.sender._id === data.message.sender._id
+                ? { ...data.message, isOwn: data.message.sender._id === userId }
+                : m
+            );
+          }
+
+          return [...prev, {
             ...data.message,
-            isOwn: data.message.sender._id === localStorage.getItem('userId')
+            isOwn: data.message.sender._id === userId
           }];
         });
       }
     });
 
-    // Typing indicators
     newSocket.on('userTyping', (data) => {
       if (data.chatId === chatId && data.userId !== localStorage.getItem('userId')) {
         setTypingUser(data.userName);
         setIsTyping(true);
-        
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-        
+
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
         typingTimeoutRef.current = setTimeout(() => {
           setIsTyping(false);
           setTypingUser(null);
@@ -130,14 +141,13 @@ const ChatWindow = () => {
       if (chatId && newSocket.connected) {
         newSocket.emit('leaveChat', chatId);
       }
+      newSocket.off('newMessage');
+      newSocket.off('userTyping');
       newSocket.disconnect();
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, [chatId]);
 
-  // Fetch chat session and messages
   const fetchChatSession = useCallback(async () => {
     if (!chatId) {
       setError('Invalid chat session');
@@ -172,7 +182,6 @@ const ChatWindow = () => {
     }
   }, [chatId]);
 
-  // Handle typing indicator
   const handleTyping = useCallback(() => {
     if (socket && isConnected) {
       socket.emit('typing', {
@@ -183,7 +192,6 @@ const ChatWindow = () => {
     }
   }, [socket, isConnected, chatId]);
 
-  // Send message handler (FIXED)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !chatId || !isConnected) return;
@@ -199,7 +207,6 @@ const ChatWindow = () => {
       isTemp: true
     };
 
-    // Optimistic update
     setMessages(prev => [...prev, tempMessage]);
     setNewMessage('');
 
@@ -209,35 +216,25 @@ const ChatWindow = () => {
         sender: currentUserId
       });
 
-      // Replace temp message with server response
-      setMessages(prev => prev.map(m => 
+      setMessages(prev => prev.map(m =>
         m._id === tempId ? { ...res.data.data, isOwn: true } : m
       ));
     } catch (err) {
-      // Rollback on error
       setMessages(prev => prev.filter(m => m._id !== tempId));
       toast.error(err.response?.data?.message || 'Failed to send message');
     }
   };
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Fetch chat data on mount
   useEffect(() => {
     fetchChatSession();
   }, [fetchChatSession]);
 
-  if (!chatId) {
-    return <ErrorDisplay message="Invalid chat session" onRetry={() => navigate('/')} />;
-  }
-
-  if (loading) {
-    return <LoadingSpinner fullScreen />;
-  }
-
+  if (!chatId) return <ErrorDisplay message="Invalid chat session" onRetry={() => navigate('/')} />;
+  if (loading) return <LoadingSpinner fullScreen />;
   if (error || !chatSession) {
     return (
       <ErrorDisplay
@@ -250,7 +247,6 @@ const ChatWindow = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Chat header */}
       <div className="bg-white dark:bg-gray-800 p-4 shadow-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -284,7 +280,6 @@ const ChatWindow = () => {
         )}
       </div>
 
-      {/* Messages container */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -292,14 +287,14 @@ const ChatWindow = () => {
           </div>
         ) : (
           messages.map((message) => (
-            <div 
+            <div
               key={message._id}
               className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
             >
-              <div 
+              <div
                 className={`max-w-xs md:max-w-md lg:max-w-lg rounded-lg p-3 ${
                   message.isOwn
-                    ? 'bg-blue-500 text-white' 
+                    ? 'bg-blue-500 text-white'
                     : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white'
                 }`}
               >
@@ -319,7 +314,6 @@ const ChatWindow = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message input */}
       <form onSubmit={handleSendMessage} className="bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center">
           <input

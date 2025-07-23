@@ -20,13 +20,20 @@ const verifyToken = (req, res, next) => {
 };
 
 router.post('/', verifyToken, async (req, res) => {
-  const { title, author, genre, coverUrl } = req.body;
+  const { title, author, genre, coverUrl, bookUrl } = req.body;
   if (!title || !coverUrl) {
     return res.status(400).json({ message: 'Title and Cover Image are required' });
   }
 
   try {
-    const newBook = new Book({ user: req.userId, title, author, genre, coverUrl });
+    const newBook = new Book({ 
+      user: req.userId, 
+      title, 
+      author, 
+      genre, 
+      coverUrl,
+      bookUrl 
+    });
     const saved = await newBook.save();
     res.status(201).json(saved);
   } catch (err) {

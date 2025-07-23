@@ -26,14 +26,13 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// Socket.IO Setup (Fixed Config)
+// Socket.IO Setup (with proper CORS)
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true
   },
-  // Removed connectionStateRecovery (causes issues with manual reconnects)
 });
 
 // Middleware
@@ -46,11 +45,11 @@ app.use(express.json());
 // Log CORS origin
 console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:5173');
 
-// Socket.IO Events (Fixed Handlers)
+// === Socket.IO Events ===
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
-  // User-specific notification room
+  // User-specific room (e.g., notifications)
   socket.on('joinUserRoom', (userId) => {
     if (userId) {
       socket.join(`user-${userId}`);
@@ -58,34 +57,49 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Chat room join (Flexible payload handling)
+  // Join Chat
   socket.on('joinChat', (data) => {
-    const chatId = data.chatId || data; // Supports both { chatId } and raw string
+    const chatId = data.chatId || data;
     if (chatId) {
       socket.join(`chat-${chatId}`);
       console.log(`Socket ${socket.id} joined chat room: chat-${chatId}`);
     }
   });
 
-  // Chat message broadcast (Fixed: uses io.to() to include sender)
-  socket.on('sendMessage', ({ chatId, message }) => {
-    if (chatId && message) {
-      io.to(`chat-${chatId}`).emit('newMessage', { chatId, message }); // Broadcast to ALL in room
-      console.log(`Message broadcasted to chat-${chatId}:`, message);
+
+  socket.on('leaveChat', (chatId) => {
+    if (chatId) {
+      socket.leave(`chat-${chatId}`);
+      console.log(`🚪 Socket ${socket.id} left chat room: chat-${chatId}`);
     }
   });
 
-  // Error and disconnect handlers
-  socket.on('disconnect', (reason) => {
-    console.log(`Socket disconnected (${socket.id}): ${reason}`);
+
+  socket.on('typing', ({ chatId, userId, userName }) => {
+    if (chatId && userId) {
+      socket.to(`chat-${chatId}`).emit('userTyping', { chatId, userId, userName });
+    }
   });
 
+  // Send Message
+  socket.on('sendMessage', ({ chatId, message }) => {
+    if (chatId && message) {
+      io.to(`chat-${chatId}`).emit('newMessage', { chatId, message });
+      console.log(`Message sent to chat-${chatId}:`, message);
+    }
+  });
+
+  // Error + Disconnect
   socket.on('error', (err) => {
     console.error(`Socket error (${socket.id}):`, err);
   });
+
+  socket.on('disconnect', (reason) => {
+    console.log(`Socket disconnected (${socket.id}): ${reason}`);
+  });
 });
 
-// API Routes
+// === API Routes ===
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/tracks', trackRoutes);
@@ -101,7 +115,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai', aiRoutes);
 
-// MongoDB Connection & Server Start
+// === MongoDB & Server Start ===
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
@@ -110,4 +124,5 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
+// Export socket instance
 export { io };

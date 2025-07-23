@@ -16,7 +16,8 @@ const bookSchema = new mongoose.Schema({
       validator: url => /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif)$/.test(url),
       message: 'Invalid image URL',
     }
-  }
+  },
+  bookUrl: { type: String }
 }, { timestamps: true });
 
 export default mongoose.model('Book', bookSchema);

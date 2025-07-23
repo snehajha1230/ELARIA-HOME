@@ -9,6 +9,7 @@ const AddBook = () => {
     author: '',
     genre: '',
     coverUrl: '',
+    bookUrl: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,7 +93,7 @@ const AddBook = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {['title', 'author', 'genre', 'coverUrl'].map((field) => (
+              {['title', 'author', 'genre', 'coverUrl', 'bookUrl'].map((field) => (
                 <div key={field} className="group">
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
                     {field.replace(/Url$/, ' URL')}

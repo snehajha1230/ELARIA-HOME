@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiHome, FiSun, FiMoon, FiSettings } from 'react-icons/fi';
+import { FiHome, FiSun, FiMoon, FiSettings, FiMusic } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import rain from '../../assets/audio/rain.mp3';
+import forest from '../../assets/audio/forest.mp3';
+import piano from '../../assets/audio/piano.mp3';
 
 const CrushNotes = () => {
   const [note, setNote] = useState('');
@@ -10,6 +13,9 @@ const CrushNotes = () => {
   const [theme, setTheme] = useState('sunset');
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showMusicOptions, setShowMusicOptions] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -102,6 +108,21 @@ const CrushNotes = () => {
 
   const currentTheme = themes[theme][darkMode ? 'dark' : 'light'];
 
+  const musicOptions = [
+    {
+      name: 'Gentle Rain',
+      url: rain
+    },
+    {
+      name: 'Forest Ambience',
+      url: forest
+    },
+    {
+      name: 'Calm Piano',
+      url: piano
+    }
+  ];
+
   const handleCrush = () => {
     if (note.trim()) {
       setCrushed(true);
@@ -115,6 +136,51 @@ const CrushNotes = () => {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
+
+  const toggleMusic = (musicUrl) => {
+    if (currentAudio && (currentAudio.src === musicUrl || currentAudio.src.includes(musicUrl))) {
+      // Toggle play/pause if same music is selected
+      if (isPlaying) {
+        currentAudio.pause();
+        setIsPlaying(false);
+      } else {
+        currentAudio.play();
+        setIsPlaying(true);
+      }
+    } else {
+      // Stop current audio if playing
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      
+      // Create new audio and play
+      const audio = new Audio(musicUrl);
+      audio.loop = true;
+      audio.play();
+      setCurrentAudio(audio);
+      setIsPlaying(true);
+    }
+    setShowMusicOptions(false);
+  };
+
+  const stopMusic = () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // Clean up audio when component unmounts
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+    };
+  }, [currentAudio]);
 
   return (
     <div className={`relative min-h-screen w-full bg-gradient-to-br ${currentTheme.bg} transition-colors duration-500`}>
@@ -135,15 +201,90 @@ const CrushNotes = () => {
                 {darkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
               </motion.button>
               
-              <motion.button
-                onClick={() => setShowSettings(!showSettings)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={`p-2 rounded-full ${currentTheme.text}`}
-                aria-label="Settings"
-              >
-                <FiSettings className="w-5 h-5" />
-              </motion.button>
+              <div className="relative">
+                <motion.button
+                  onClick={() => setShowSettings(!showSettings)}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`p-2 rounded-full ${currentTheme.text}`}
+                  aria-label="Settings"
+                >
+                  <FiSettings className="w-5 h-5" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showSettings && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
+                    >
+                      <div className="py-1">
+                        <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
+                          Theme Options
+                        </div>
+                        {Object.keys(themes).map((t) => (
+                          <button
+                            key={t}
+                            onClick={() => {
+                              setTheme(t);
+                              setShowSettings(false);
+                            }}
+                            className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                          >
+                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="relative">
+                <motion.button
+                  onClick={() => setShowMusicOptions(!showMusicOptions)}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`p-2 rounded-full ${currentTheme.text} ${isPlaying ? 'text-pink-500' : ''}`}
+                  aria-label="Music"
+                >
+                  <FiMusic className="w-5 h-5" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showMusicOptions && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
+                    >
+                      <div className="py-1">
+                        <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
+                          Music Options
+                        </div>
+                        {musicOptions.map((music) => (
+                          <button
+                            key={music.name}
+                            onClick={() => toggleMusic(music.url)}
+                            className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                          >
+                            {music.name}
+                          </button>
+                        ))}
+                        <button
+                          onClick={stopMusic}
+                          className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                        >
+                          Stop Music
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <motion.button
                 onClick={() => navigate('/comfort-space')}
@@ -158,36 +299,6 @@ const CrushNotes = () => {
           </div>
         </div>
       </nav>
-
-      {/* Settings Dropdown */}
-      <AnimatePresence>
-        {showSettings && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`fixed right-4 top-16 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
-          >
-            <div className="py-1">
-              <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
-                Theme Options
-              </div>
-              {Object.keys(themes).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => {
-                    setTheme(t);
-                    setShowSettings(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-                >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Main Content */}
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
