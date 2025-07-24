@@ -96,7 +96,7 @@ const Login = () => {
               onClick={() => navigate('/signup')}
               className="underline hover:text-black"
             >
-              Login
+              SignUp
             </button>
           </p>
         </form>
