@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaTrash, FaMusic, FaSearch, FaHome, FaPlay } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaMusic, FaSearch, FaHome, FaPlay, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -37,6 +37,10 @@ const SoundCorner = () => {
     } catch {
       toast.error('Could not delete track');
     }
+  };
+
+  const handleEdit = (track) => {
+    navigate('/add-track', { state: { trackToEdit: track } });
   };
 
   const filteredTracks = tracks.filter(track => 
@@ -171,7 +175,7 @@ const SoundCorner = () => {
                         {track.album}
                       </p>
                     )}
-                    <div className="flex justify-between items-center">
+                    {/* <div className="flex justify-between items-center">
                       <span className="inline-block bg-purple-900/30 dark:bg-purple-900 text-purple-200 dark:text-purple-200 px-3 py-1 text-xs rounded-full">
                         {track.genre || 'Various'}
                       </span>
@@ -180,19 +184,30 @@ const SoundCorner = () => {
                           {track.duration}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                   </div>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(track._id);
-                    }}
-                    className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <FaTrash size={14} />
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="absolute top-3 right-3 flex space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(track);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <FaEdit size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(track._id);
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
-import { X, Plus, BookOpen, Search, Home } from 'lucide-react';
+import { X, Plus, BookOpen, Search, Home, Edit } from 'lucide-react';
 
 const Poetry = () => {
   const [poems, setPoems] = useState([]);
@@ -34,6 +34,10 @@ const Poetry = () => {
     } catch {
       toast.error('Failed to delete poem');
     }
+  };
+
+  const handleEdit = (poem) => {
+    navigate('/add-poem', { state: { poemToEdit: poem } });
   };
 
   const filteredPoems = poems.filter(poem => 
@@ -112,12 +116,20 @@ const Poetry = () => {
                 >
                   {/* Poem Content */}
                   <div className="p-6">
-                    <button
-                      onClick={() => handleDelete(poem._id)}
-                      className="absolute top-3 right-3 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <X size={20} />
-                    </button>
+                    <div className="absolute top-3 right-3 flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(poem)}
+                        className="text-gray-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <Edit size={20} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(poem._id)}
+                        className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
 
                     <div className="mb-6">
                       <h2 className="text-xl font-serif font-bold text-gray-800 dark:text-gray-100 mb-2">

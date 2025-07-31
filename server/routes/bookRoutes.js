@@ -42,6 +42,30 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
+router.put('/:id', verifyToken, async (req, res) => {
+  const { title, author, genre, coverUrl, bookUrl } = req.body;
+  if (!title || !coverUrl) {
+    return res.status(400).json({ message: 'Title and Cover Image are required' });
+  }
+
+  try {
+    const updatedBook = await Book.findOneAndUpdate(
+      { _id: req.params.id, user: req.userId },
+      { title, author, genre, coverUrl, bookUrl },
+      { new: true }
+    );
+    
+    if (!updatedBook) {
+      return res.status(404).json({ message: 'Book not found or not authorized' });
+    }
+    
+    res.status(200).json(updatedBook);
+  } catch (err) {
+    console.error('Error updating book:', err);
+    res.status(500).json({ message: 'Server error while updating book' });
+  }
+});
+
 router.get('/', verifyToken, async (req, res) => {
   try {
     const books = await Book.find({ user: req.userId }).sort({ createdAt: -1 });

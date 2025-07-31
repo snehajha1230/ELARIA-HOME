@@ -1,18 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const AddTrack = () => {
+  const location = useLocation();
   const [form, setForm] = useState({
     title: '',
     artist: '',
     coverUrl: '',
     trackUrl: ''
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [trackId, setTrackId] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.trackToEdit) {
+      const { _id, title, artist, coverUrl, trackUrl } = location.state.trackToEdit;
+      setForm({ title, artist, coverUrl, trackUrl });
+      setIsEditing(true);
+      setTrackId(_id);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,10 +47,17 @@ const AddTrack = () => {
     }
 
     try {
-      await axios.post('/tracks', form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Track added to your sound collection!');
+      if (isEditing) {
+        await axios.put(`/tracks/${trackId}`, form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Track updated successfully!');
+      } else {
+        await axios.post('/tracks', form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Track added to your sound collection!');
+      }
       navigate('/sound-corner');
     } catch (err) {
       console.error(err);
@@ -110,7 +128,7 @@ const AddTrack = () => {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Add Comfort Track
+                {isEditing ? 'Edit Comfort Track' : 'Add Comfort Track'}
               </h2>
             </div>
 
@@ -187,14 +205,14 @@ const AddTrack = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Saving Your Comfort Track...
+                      {isEditing ? 'Updating Track...' : 'Saving Your Comfort Track...'}
                     </>
                   ) : (
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Add to Sound Collection
+                      {isEditing ? 'Update Track' : 'Add to Sound Collection'}
                     </>
                   )}
                 </button>

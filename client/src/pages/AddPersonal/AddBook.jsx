@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const AddBook = () => {
+  const location = useLocation();
   const [form, setForm] = useState({
     title: '',
     author: '',
@@ -13,7 +14,18 @@ const AddBook = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [bookId, setBookId] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.bookToEdit) {
+      const { _id, ...bookData } = location.state.bookToEdit;
+      setForm(bookData);
+      setIsEditMode(true);
+      setBookId(_id);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,13 +42,20 @@ const AddBook = () => {
     }
 
     try {
-      await axios.post('/books', form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Book added to your collection!');
+      if (isEditMode) {
+        await axios.put(`/books/${bookId}`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Book updated successfully!');
+      } else {
+        await axios.post('/books', form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Book added to your collection!');
+      }
       navigate('/quiet-library');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error adding book');
+      toast.error(err.response?.data?.message || 'Error saving book');
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +74,9 @@ const AddBook = () => {
                 </h2>
                 <div className="w-16 h-1 bg-amber-700 dark:bg-amber-400 mb-4"></div>
                 <p className="text-amber-800 dark:text-amber-200 italic font-serif text-lg">
-                  "Every book you add becomes a new friend in your personal library."
+                  {isEditMode 
+                    ? "Update your book's details to keep your collection current." 
+                    : "Every book you add becomes a new friend in your personal library."}
                 </p>
               </div>
               
@@ -66,7 +87,9 @@ const AddBook = () => {
                     Did you know?
                   </h3>
                   <p className="text-sm text-amber-800 dark:text-amber-100">
-                    Personal libraries reflect our journey. Each book tells a story about when and why it joined your collection.
+                    {isEditMode
+                      ? "Keeping your book details accurate helps you remember why each book is special to you."
+                      : "Personal libraries reflect our journey. Each book tells a story about when and why it joined your collection."}
                   </p>
                 </div>
               </div>
@@ -74,7 +97,7 @@ const AddBook = () => {
             
             <div className="mt-auto pt-4 border-t border-amber-300 dark:border-amber-700">
               <p className="text-xs text-amber-700 dark:text-amber-300">
-                <span className="font-semibold">Tip:</span> Add books that speak to you. This is your curated space.
+                <span className="font-semibold">Tip:</span> {isEditMode ? "Update any details that have changed since you added this book." : "Add books that speak to you. This is your curated space."}
               </p>
             </div>
           </div>
@@ -88,7 +111,7 @@ const AddBook = () => {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Add to Your Collection
+                {isEditMode ? 'Edit Book Details' : 'Add to Your Collection'}
               </h2>
             </div>
 
@@ -124,14 +147,14 @@ const AddBook = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Adding...
+                      {isEditMode ? 'Updating...' : 'Adding...'}
                     </>
                   ) : (
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isEditMode ? "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" : "M12 6v6m0 0v6m0-6h6m-6 0H6"} />
                       </svg>
-                      Add to Your Collection
+                      {isEditMode ? 'Update Book' : 'Add to Your Collection'}
                     </>
                   )}
                 </button>

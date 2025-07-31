@@ -58,6 +58,31 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// PUT /api/media/:id - Update a media item
+router.put('/:id', verifyToken, async (req, res) => {
+  const { title, type, thumbnailUrl, mediaUrl } = req.body;
+  if (!title || !mediaUrl) {
+    return res.status(400).json({ message: 'Title and media URL are required' });
+  }
+
+  try {
+    const media = await Media.findOneAndUpdate(
+      { _id: req.params.id, user: req.userId },
+      { title, type, thumbnailUrl, mediaUrl },
+      { new: true }
+    );
+
+    if (!media) {
+      return res.status(404).json({ message: 'Media not found' });
+    }
+
+    res.status(200).json(media);
+  } catch (err) {
+    console.error('Error updating media:', err);
+    res.status(500).json({ message: 'Server error while updating media' });
+  }
+});
+
 // DELETE /api/media/:id - Delete a media item
 router.delete('/:id', verifyToken, async (req, res) => {
   try {

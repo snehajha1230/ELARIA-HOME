@@ -1,4 +1,3 @@
-// server/routes/poemRoutes.js
 import express from 'express';
 import Poem from '../models/Poem.js';
 import jwt from 'jsonwebtoken';
@@ -35,6 +34,26 @@ router.post('/', verifyToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error while saving poem' });
+  }
+});
+
+// PUT: Update poem
+router.put('/:id', verifyToken, async (req, res) => {
+  const { title, author, linkUrl } = req.body;
+  if (!title || !linkUrl) return res.status(400).json({ message: 'Title and link are required' });
+
+  try {
+    const updatedPoem = await Poem.findOneAndUpdate(
+      { _id: req.params.id, user: req.userId },
+      { title, author, linkUrl },
+      { new: true }
+    );
+    
+    if (!updatedPoem) return res.status(404).json({ message: 'Poem not found' });
+    res.json(updatedPoem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error while updating poem' });
   }
 });
 

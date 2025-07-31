@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const AddPoem = () => {
+  const location = useLocation();
+  const poemToEdit = location.state?.poemToEdit;
+  
   const [form, setForm] = useState({
     title: '',
     author: '',
@@ -11,7 +14,19 @@ const AddPoem = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (poemToEdit) {
+      setForm({
+        title: poemToEdit.title,
+        author: poemToEdit.author || '',
+        linkUrl: poemToEdit.linkUrl
+      });
+      setIsEditing(true);
+    }
+  }, [poemToEdit]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,10 +43,17 @@ const AddPoem = () => {
     }
 
     try {
-      await axios.post('/poems', form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Your poem has been added to the collection!');
+      if (isEditing) {
+        await axios.put(`/poems/${poemToEdit._id}`, form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Poem updated successfully!');
+      } else {
+        await axios.post('/poems', form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Your poem has been added to the collection!');
+      }
       navigate('/poetry');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Something went wrong while saving your poem');
@@ -101,7 +123,7 @@ const AddPoem = () => {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Share Your Poem
+                {isEditing ? 'Edit Your Poem' : 'Share Your Poem'}
               </h2>
             </div>
 
@@ -162,14 +184,14 @@ const AddPoem = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Preserving Your Words...
+                      {isEditing ? 'Updating Your Poem...' : 'Preserving Your Words...'}
                     </>
                   ) : (
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Add to Poetry Collection
+                      {isEditing ? 'Update Poem' : 'Add to Poetry Collection'}
                     </>
                   )}
                 </button>

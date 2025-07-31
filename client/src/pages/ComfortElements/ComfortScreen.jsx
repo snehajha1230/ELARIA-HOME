@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaTrash, FaFilm, FaSearch, FaPlay, FaHome } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaFilm, FaSearch, FaPlay, FaHome, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -33,6 +33,10 @@ const ComfortScreen = () => {
     } catch {
       toast.error('Could not delete media');
     }
+  };
+
+  const handleEdit = (media) => {
+    navigate('/add-media', { state: { mediaToEdit: media } });
   };
 
   const handleWatch = (url) => {
@@ -148,7 +152,7 @@ const ComfortScreen = () => {
                         {media.description}
                       </p>
                     )}
-                    <div className="flex justify-between items-center">
+                    {/* <div className="flex justify-between items-center">
                       <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 text-xs rounded-full">
                         {media.genre || 'General'}
                       </span>
@@ -157,19 +161,30 @@ const ComfortScreen = () => {
                           {media.duration}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                   </div>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(media._id);
-                    }}
-                    className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <FaTrash size={14} />
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="absolute top-3 right-3 flex space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(media);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <FaEdit size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(media._id);
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

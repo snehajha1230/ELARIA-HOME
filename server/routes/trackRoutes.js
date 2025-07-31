@@ -62,6 +62,33 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// @route   PUT /api/tracks/:id
+// @desc    Update a track by ID
+router.put('/:id', verifyToken, async (req, res) => {
+  const { title, artist, coverUrl, trackUrl } = req.body;
+
+  if (!title || !trackUrl) {
+    return res.status(400).json({ message: 'Title and link are required' });
+  }
+
+  try {
+    const track = await Track.findOneAndUpdate(
+      { _id: req.params.id, user: req.userId },
+      { title, artist, coverUrl, trackUrl },
+      { new: true }
+    );
+
+    if (!track) {
+      return res.status(404).json({ message: 'Track not found' });
+    }
+
+    res.status(200).json(track);
+  } catch (err) {
+    console.error('Error updating track:', err);
+    res.status(500).json({ message: 'Server error while updating track' });
+  }
+});
+
 // @route   DELETE /api/tracks/:id
 // @desc    Delete a track by ID
 router.delete('/:id', verifyToken, async (req, res) => {
