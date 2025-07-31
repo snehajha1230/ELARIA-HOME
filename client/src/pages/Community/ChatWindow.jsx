@@ -56,7 +56,7 @@ const ChatWindow = () => {
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+    const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'https://elaria-server.onrender.com').replace(/\/$/, '');
     const newSocket = io(socketUrl, {
       path: '/socket.io',
       reconnection: true,
@@ -89,7 +89,6 @@ const ChatWindow = () => {
       toast.error(`Connection error: ${err.message}`);
     });
 
-    // ✅ FIXED LOGIC BELOW (deduplicates optimistic messages)
     newSocket.on('newMessage', (data) => {
       console.log('Received message:', data);
       if (data.chatId === chatId) {
