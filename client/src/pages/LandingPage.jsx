@@ -1,18 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
-  const handleGetStarted = () => {
-    navigate('/signup');
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault(); 
+      setDeferredPrompt(e); 
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Trigger prompt on button click
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    }
   };
-  const handleExplore = () => {
-    navigate('/about');
-  };
-  const handleHome = () => {
-    navigate('/home');
-  };
+
+  const handleGetStarted = () => navigate('/signup');
+  const handleExplore = () => navigate('/about');
+  const handleHome = () => navigate('/home');
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
@@ -34,7 +59,7 @@ const LandingPage = () => {
           </p>
 
           {/* Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
             <button
               onClick={handleExplore}
               className="bg-white text-black border border-black hover:bg-black hover:text-white px-6 py-3 text-sm uppercase tracking-wide font-medium transition-all duration-300 shadow hover:scale-105"
@@ -53,7 +78,16 @@ const LandingPage = () => {
             >
               Home
             </button>
-            
+
+            {/*Install App Button */}
+            {showInstallButton && (
+              <button
+                onClick={handleInstallClick}
+                className="bg-green-600 text-white border border-black hover:bg-white hover:text-black px-6 py-3 text-sm uppercase tracking-wide font-medium transition-all duration-300 shadow hover:scale-105"
+              >
+                Install App
+              </button>
+            )}
           </div>
         </div>
       </div>
