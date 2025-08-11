@@ -24,7 +24,7 @@ const HelperDashboard = () => {
       }
     };
 
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('https://elaria-server.onrender.com', {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
