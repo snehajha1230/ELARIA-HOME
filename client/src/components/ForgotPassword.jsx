@@ -12,7 +12,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post('https://elaria-server.onrender.com/api/auth/forgot-password', { email });
       toast.success('Password reset link sent to your email');
       setTimeout(() => {
         navigate('/login');
