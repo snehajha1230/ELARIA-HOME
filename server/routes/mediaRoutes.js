@@ -26,7 +26,7 @@ const verifyToken = (req, res, next) => {
 
 // POST /api/media - Add new media
 router.post('/', verifyToken, async (req, res) => {
-  const { title, type, thumbnailUrl, mediaUrl } = req.body;
+  const { title, type, thumbnailUrl, mediaUrl, isPublic } = req.body;
   if (!title || !mediaUrl) {
     return res.status(400).json({ message: 'Title and media URL are required' });
   }
@@ -37,7 +37,8 @@ router.post('/', verifyToken, async (req, res) => {
       title,
       type,
       thumbnailUrl,
-      mediaUrl
+      mediaUrl,
+      isPublic: isPublic !== undefined ? isPublic : true // Default to true if not provided
     });
 
     const saved = await newMedia.save();
@@ -58,9 +59,24 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// GET /api/media/public/:userId - Get public media for a specific user
+router.get('/public/:userId', async (req, res) => {
+  try {
+    const media = await Media.find({ 
+      user: req.params.userId,
+      isPublic: true 
+    }).sort({ createdAt: -1 });
+    
+    res.status(200).json(media);
+  } catch (err) {
+    console.error('Error fetching public media:', err);
+    res.status(500).json({ message: 'Server error while fetching public media' });
+  }
+});
+
 // PUT /api/media/:id - Update a media item
 router.put('/:id', verifyToken, async (req, res) => {
-  const { title, type, thumbnailUrl, mediaUrl } = req.body;
+  const { title, type, thumbnailUrl, mediaUrl, isPublic } = req.body;
   if (!title || !mediaUrl) {
     return res.status(400).json({ message: 'Title and media URL are required' });
   }
@@ -68,7 +84,13 @@ router.put('/:id', verifyToken, async (req, res) => {
   try {
     const media = await Media.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
-      { title, type, thumbnailUrl, mediaUrl },
+      { 
+        title, 
+        type, 
+        thumbnailUrl, 
+        mediaUrl,
+        isPublic: isPublic !== undefined ? isPublic : true
+      },
       { new: true }
     );
 

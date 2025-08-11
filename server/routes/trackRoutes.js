@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 // @route   POST /api/tracks
 // @desc    Add new track
 router.post('/', verifyToken, async (req, res) => {
-  const { title, artist, coverUrl, trackUrl } = req.body;
+  const { title, artist, coverUrl, trackUrl, isPublic } = req.body;
 
   if (!title || !trackUrl) {
     return res.status(400).json({ message: 'Title and link are required' });
@@ -40,7 +40,8 @@ router.post('/', verifyToken, async (req, res) => {
       title,
       artist,
       coverUrl,
-      trackUrl
+      trackUrl,
+      isPublic: isPublic !== undefined ? isPublic : true
     });
 
     const saved = await newTrack.save();
@@ -62,10 +63,26 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// @route   GET /api/tracks/public/:userId
+// @desc    Get public tracks for a specific user
+router.get('/public/:userId', async (req, res) => {
+  try {
+    const tracks = await Track.find({ 
+      user: req.params.userId,
+      isPublic: true 
+    }).sort({ createdAt: -1 });
+    
+    res.status(200).json(tracks);
+  } catch (err) {
+    console.error('Error fetching public tracks:', err);
+    res.status(500).json({ message: 'Server error while fetching public tracks' });
+  }
+});
+
 // @route   PUT /api/tracks/:id
 // @desc    Update a track by ID
 router.put('/:id', verifyToken, async (req, res) => {
-  const { title, artist, coverUrl, trackUrl } = req.body;
+  const { title, artist, coverUrl, trackUrl, isPublic } = req.body;
 
   if (!title || !trackUrl) {
     return res.status(400).json({ message: 'Title and link are required' });
@@ -74,7 +91,13 @@ router.put('/:id', verifyToken, async (req, res) => {
   try {
     const track = await Track.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
-      { title, artist, coverUrl, trackUrl },
+      { 
+        title, 
+        artist, 
+        coverUrl, 
+        trackUrl,
+        isPublic: isPublic !== undefined ? isPublic : true
+      },
       { new: true }
     );
 

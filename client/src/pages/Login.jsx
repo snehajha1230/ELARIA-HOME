@@ -20,7 +20,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://elaria-server.onrender.com/api/auth/login', formData);
+      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
       
       // Ensure token and user are stored correctly
       const { token, user } = res.data;
@@ -84,11 +84,30 @@ const Login = () => {
           </div>
 
           <button
+            type="button"
+            onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 hover:bg-gray-100 transition">
+            <img src="https://images.icon-icons.com/2108/PNG/512/google_icon_130924.png" alt="google" className="w-5 h-5" />
+            Continue with Google
+          </button>
+
+
+          <button
             type="submit"
             className="w-full bg-black text-white py-2 uppercase font-medium tracking-wide hover:bg-white hover:text-black border border-black transition-all duration-300"
           >
             Log In
           </button>
+<p className="text-center text-sm text-gray-600">
+  Forgot your password?{' '}
+  <button
+    type="button"
+    onClick={() => navigate('/forgot-password')}
+    className="underline hover:text-black"
+  >
+    Reset it here
+  </button>
+</p>
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{' '}
             <button

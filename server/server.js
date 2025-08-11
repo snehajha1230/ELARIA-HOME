@@ -4,6 +4,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import passport from 'passport';
+import session from 'express-session';
+import './config/passport.js';
 
 // Route Imports
 import authRoutes from './routes/authRoutes.js';
@@ -20,6 +23,10 @@ import helperRoutes from './routes/helperRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
+import roomRoutes from './routes/roomRoutes.js';
+import diaryRoutes from './routes/diaryRoutes.js';
+
 
 dotenv.config();
 
@@ -29,7 +36,7 @@ const httpServer = createServer(app);
 // Socket.IO Setup (with proper CORS)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com',
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true
   },
@@ -37,13 +44,13 @@ const io = new Server(httpServer, {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
 
 // Log CORS origin
-console.log('CORS allowed origin:', process.env.CLIENT_URL || 'https://elaria-ueqy.onrender.com');
+console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:5173');
 
 // === Socket.IO Events ===
 io.on('connection', (socket) => {
@@ -114,6 +121,18 @@ app.use('/api/helpers', helperRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/diary', diaryRoutes);
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 // === MongoDB & Server Start ===
 mongoose.connect(process.env.MONGO_URI)

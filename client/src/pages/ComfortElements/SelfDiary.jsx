@@ -1,53 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiTrash2, FiHome, FiSun, FiMoon, FiSettings, FiX, FiMusic } from 'react-icons/fi';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { FiTrash2, FiHome, FiSun, FiMoon, FiSettings, FiX, FiMusic, FiEdit } from 'react-icons/fi';
 import axios from '../../utils/api';
-import { useNavigate } from 'react-router-dom';
-import rain from '../../assets/audio/rain.mp3';
-import forest from '../../assets/audio/forest.mp3';
-import piano from '../../assets/audio/piano.mp3';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
 
-const SelfDiary = () => {
+const DiarySpace = () => {
+  const { state } = useLocation();
+  const viewOnly = state?.viewOnly || false;
+  const friendId = state?.friendId;
+  const navigate = useNavigate();
+  
+  // State for diary functionality
   const [entry, setEntry] = useState('');
   const [savedEntries, setSavedEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // State for UI customization
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showMusicOptions, setShowMusicOptions] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [theme, setTheme] = useState('sunset');
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
-    
-    const fetchNotes = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get('/notes', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  // Music options
+  const musicOptions = [
+    { name: 'Gentle Rain', url: '/assets/audio/rain.mp3' },
+    { name: 'Forest Ambience', url: '/assets/audio/forest.mp3' },
+    { name: 'Calm Piano', url: '/assets/audio/piano.mp3' }
+  ];
 
-        const formattedNotes = res.data.map(note => ({
-          text: note.content,
-          time: new Date(note.createdAt).toLocaleString(),
-          _id: note._id,
-        }));
-
-        setSavedEntries(formattedNotes);
-      } catch (error) {
-        console.error('Error fetching notes:', error);
-      }
-    };
-
-    fetchNotes();
-  }, []);
-
+  // Theme definitions
   const themes = {
     sunset: {
       light: {
@@ -153,64 +138,86 @@ const SelfDiary = () => {
     }
   };
 
-  const musicOptions = [
-    {
-      name: 'Gentle Rain',
-      url: rain
-    },
-    {
-      name: 'Forest Ambience',
-      url: forest
-    },
-    {
-      name: 'Calm Piano',
-      url: piano
-    }
-  ];
-
   const currentTheme = themes[theme][darkMode ? 'dark' : 'light'];
 
+  // Fetch diary entries (only for user mode)
+  const fetchEntries = async () => {
+    if (viewOnly) {
+      // For view mode, just simulate loading and show private message
+      setIsLoading(true);
+      setTimeout(() => setIsLoading(false), 500);
+      return;
+    }
+
+    // Original backend logic for user mode
+    setIsLoading(true);
+    try {
+      const res = await axios.get('/diary', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const formattedEntries = res.data.map(entry => ({
+        text: entry.content,
+        time: new Date(entry.createdAt).toLocaleString(),
+        _id: entry._id,
+      }));
+      setSavedEntries(formattedEntries);
+    } catch (err) {
+      console.error('Fetch entries error:', err.response?.data || err.message);
+      toast.error('Failed to load your diary entries');
+      setSavedEntries([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save a new diary entry (only for user mode)
   const handleSave = async () => {
     if (entry.trim()) {
-      const newEntry = {
-        title: 'Diary',
-        content: entry,
-      };
       try {
-        const res = await axios.post('/notes', newEntry);
-        const savedNote = res.data;
+        const newEntry = {
+          content: entry,
+          isPublic: false
+        };
+        
+        const res = await axios.post('/diary', newEntry);
+        const savedEntry = res.data;
         const formatted = {
-          text: savedNote.content,
-          time: new Date(savedNote.createdAt).toLocaleString(),
-          _id: savedNote._id,
+          text: savedEntry.content,
+          time: new Date(savedEntry.createdAt).toLocaleString(),
+          _id: savedEntry._id,
         };
         setSavedEntries([formatted, ...savedEntries]);
         setEntry('');
+        toast.success('Diary entry saved successfully');
       } catch (err) {
         console.error('Error saving entry:', err);
+        toast.error('Failed to save diary entry');
       }
     }
   };
 
-  const handleDelete = async (index) => {
-    const noteToDelete = savedEntries[index];
+  // Delete a diary entry (only for user mode)
+  const handleDelete = async (id) => {
     try {
-      await axios.delete(`/notes/${noteToDelete._id}`);
-      const updated = [...savedEntries];
-      updated.splice(index, 1);
-      setSavedEntries(updated);
+      await axios.delete(`/diary/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      toast.success('Diary entry deleted');
+      setSavedEntries(savedEntries.filter((e) => e._id !== id));
     } catch (err) {
-      console.error('Error deleting note:', err);
+      console.error('Error deleting entry:', err);
+      toast.error('Failed to delete diary entry');
     }
   };
 
+  // Toggle dark mode
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
 
+  // Music controls
   const toggleMusic = (musicUrl) => {
     if (currentAudio && (currentAudio.src === musicUrl || currentAudio.src.includes(musicUrl))) {
-      // Toggle play/pause if same music is selected
       if (isPlaying) {
         currentAudio.pause();
         setIsPlaying(false);
@@ -219,13 +226,11 @@ const SelfDiary = () => {
         setIsPlaying(true);
       }
     } else {
-      // Stop current audio if playing
       if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
       }
       
-      // Create new audio and play
       const audio = new Audio(musicUrl);
       audio.loop = true;
       audio.play();
@@ -243,9 +248,9 @@ const SelfDiary = () => {
     }
   };
 
+  // Clean up audio on unmount
   useEffect(() => {
     return () => {
-      // Clean up audio when component unmounts
       if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
@@ -253,13 +258,23 @@ const SelfDiary = () => {
     };
   }, [currentAudio]);
 
+  // Fetch entries on component mount
+  useEffect(() => {
+    fetchEntries();
+    
+    // Set dark mode based on system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setDarkMode(true);
+    }
+  }, [viewOnly]);
+
   return (
     <div className={`relative min-h-screen w-full bg-gradient-to-br ${currentTheme.bg} transition-colors duration-500`}>
       {/* Navigation Bar */}
       <nav className={`fixed top-0 left-0 right-0 ${currentTheme.nav} backdrop-blur-md z-50 border-b ${currentTheme.border} shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex-1"></div> {/* Empty div for balance */}
+            <div className="flex-1"></div>
             
             <div className="flex items-center space-x-4">
               <motion.button
@@ -272,93 +287,97 @@ const SelfDiary = () => {
                 {darkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
               </motion.button>
               
-              <div className="relative">
-                <motion.button
-                  onClick={() => setShowSettings(!showSettings)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`p-2 rounded-full ${currentTheme.text}`}
-                  aria-label="Settings"
-                >
-                  <FiSettings className="w-5 h-5" />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showSettings && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
+              {!viewOnly && (
+                <>
+                  <div className="relative">
+                    <motion.button
+                      onClick={() => setShowSettings(!showSettings)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`p-2 rounded-full ${currentTheme.text}`}
+                      aria-label="Settings"
                     >
-                      <div className="py-1">
-                        <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
-                          Theme Options
-                        </div>
-                        {Object.keys(themes).map((t) => (
-                          <button
-                            key={t}
-                            onClick={() => {
-                              setTheme(t);
-                              setShowSettings(false);
-                            }}
-                            className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-                          >
-                            {t.charAt(0).toUpperCase() + t.slice(1)}
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      <FiSettings className="w-5 h-5" />
+                    </motion.button>
 
-              <div className="relative">
-                <motion.button
-                  onClick={() => setShowMusicOptions(!showMusicOptions)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`p-2 rounded-full ${currentTheme.text} ${isPlaying ? 'text-pink-500 dark:text-pink-400' : ''}`}
-                  aria-label="Music"
-                >
-                  <FiMusic className="w-5 h-5" />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showMusicOptions && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
-                    >
-                      <div className="py-1">
-                        <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
-                          Music Options
-                        </div>
-                        {musicOptions.map((music) => (
-                          <button
-                            key={music.name}
-                            onClick={() => toggleMusic(music.url)}
-                            className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-                          >
-                            {music.name}
-                          </button>
-                        ))}
-                        <button
-                          onClick={stopMusic}
-                          className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                    <AnimatePresence>
+                      {showSettings && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
                         >
-                          Stop Music
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                          <div className="py-1">
+                            <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
+                              Theme Options
+                            </div>
+                            {Object.keys(themes).map((t) => (
+                              <button
+                                key={t}
+                                onClick={() => {
+                                  setTheme(t);
+                                  setShowSettings(false);
+                                }}
+                                className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                              >
+                                {t.charAt(0).toUpperCase() + t.slice(1)}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="relative">
+                    <motion.button
+                      onClick={() => setShowMusicOptions(!showMusicOptions)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`p-2 rounded-full ${currentTheme.text} ${isPlaying ? 'text-pink-500 dark:text-pink-400' : ''}`}
+                      aria-label="Music"
+                    >
+                      <FiMusic className="w-5 h-5" />
+                    </motion.button>
+
+                    <AnimatePresence>
+                      {showMusicOptions && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${currentTheme.card} border ${currentTheme.border} z-50`}
+                        >
+                          <div className="py-1">
+                            <div className={`px-4 py-2 text-sm font-medium border-b ${currentTheme.border} ${currentTheme.text}`}>
+                              Music Options
+                            </div>
+                            {musicOptions.map((music) => (
+                              <button
+                                key={music.name}
+                                onClick={() => toggleMusic(music.url)}
+                                className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                              >
+                                {music.name}
+                              </button>
+                            ))}
+                            <button
+                              onClick={stopMusic}
+                              className={`block w-full text-left px-4 py-2 text-sm ${currentTheme.text} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                            >
+                              Stop Music
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </>
+              )}
 
               <motion.button
-                onClick={() => navigate('/comfort-space')}
+                onClick={() => navigate(viewOnly ? '/friendscommunity' : '/comfort-space')}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className={`p-2 rounded-full ${currentTheme.text}`}
@@ -380,9 +399,30 @@ const SelfDiary = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className={`text-3xl font-bold mb-4 ${currentTheme.text}`}>Your Letters</h2>
-          {savedEntries.length === 0 ? (
-            <p className={`${currentTheme.secondaryText} italic`}>No letters saved yet.</p>
+          <h2 className={`text-3xl font-bold mb-4 ${currentTheme.text}`}>
+            {viewOnly ? "Friend's Letters" : "Your Letters"}
+          </h2>
+          
+          {isLoading ? (
+            <div className="flex flex-col space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className={`p-4 rounded-md ${darkMode ? 'bg-gray-700/50' : 'bg-gray-200/50'} animate-pulse`}>
+                  <div className={`h-4 w-1/2 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className={`h-3 w-3/4 mt-2 rounded ${darkMode ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                </div>
+              ))}
+            </div>
+          ) : viewOnly ? (
+            <div className={`p-8 text-center ${currentTheme.text}`}>
+              <h3 className="text-2xl font-bold mb-4">Letters are Private</h3>
+              <p className={`${currentTheme.secondaryText}`}>
+                The content of these letters is private and cannot be viewed.
+              </p>
+            </div>
+          ) : savedEntries.length === 0 ? (
+            <p className={`${currentTheme.secondaryText} italic`}>
+              No letters saved yet
+            </p>
           ) : (
             savedEntries.map((entry, idx) => (
               <motion.div
@@ -400,15 +440,17 @@ const SelfDiary = () => {
                     {entry.time}
                   </h3>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(idx);
-                  }}
-                  className={`ml-4 ${darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'}`}
-                >
-                  <FiTrash2 size={18} />
-                </button>
+                {/* {!viewOnly && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(entry._id);
+                    }}
+                    className={`ml-4 ${darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'}`}
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                )} */}
               </motion.div>
             ))
           )}
@@ -421,36 +463,59 @@ const SelfDiary = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <motion.div 
-            className={`rounded-2xl shadow-xl p-8 max-w-3xl w-full ${currentTheme.card} border ${currentTheme.border}`}
-            whileHover={{ scale: 1.005 }}
-          >
-            <h1 className={`text-5xl text-center font-bold mb-6 ${currentTheme.text} font-['Caveat']`}>
-              Dear Me,
-            </h1>
-            <p className={`text-center mb-6 text-lg ${currentTheme.secondaryText}`}>
-              This is your private diary. Speak your heart without fear.
-            </p>
+          {!viewOnly ? (
+            <motion.div 
+              className={`rounded-2xl shadow-xl p-8 max-w-3xl w-full ${currentTheme.card} border ${currentTheme.border}`}
+              whileHover={{ scale: 1.005 }}
+            >
+              <h1 className={`text-5xl text-center font-bold mb-6 ${currentTheme.text} font-['Caveat']`}>
+                Dear Diary,
+              </h1>
+              <p className={`text-center mb-6 text-lg ${currentTheme.secondaryText}`}>
+                This is your private space. Write freely and from the heart.
+              </p>
 
-            <textarea
-              value={entry}
-              onChange={(e) => setEntry(e.target.value)}
-              placeholder="Write your letter here..."
-              className={`w-full h-64 p-5 text-xl ${darkMode ? 'bg-gray-900/30' : 'bg-white/90'} border ${currentTheme.border} rounded-xl shadow-inner resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} font-['Caveat'] leading-relaxed ${currentTheme.text} ${currentTheme.placeholder}`}
-            />
+              <textarea
+                value={entry}
+                onChange={(e) => setEntry(e.target.value)}
+                placeholder="Write your thoughts here..."
+                className={`w-full h-64 p-5 text-xl ${darkMode ? 'bg-gray-900/30' : 'bg-white/90'} border ${currentTheme.border} rounded-xl shadow-inner resize-none focus:outline-none focus:ring-2 ${currentTheme.focus} font-['Caveat'] leading-relaxed ${currentTheme.text} ${currentTheme.placeholder}`}
+              />
 
-            <div className="text-center mt-6">
-              <motion.button
-                onClick={handleSave}
-                disabled={!entry.trim()}
-                className={`${currentTheme.button} text-white px-8 py-3 text-lg rounded-full transition-all duration-300 shadow font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
-                whileHover={entry.trim() ? { scale: 1.05 } : {}}
-                whileTap={entry.trim() ? { scale: 0.95 } : {}}
-              >
-                Save Letter
-              </motion.button>
-            </div>
-          </motion.div>
+              <div className="text-center mt-6">
+                <motion.button
+                  onClick={handleSave}
+                  disabled={!entry.trim()}
+                  className={`${currentTheme.button} text-white px-8 py-3 text-lg rounded-full transition-all duration-300 shadow font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+                  whileHover={entry.trim() ? { scale: 1.05 } : {}}
+                  whileTap={entry.trim() ? { scale: 0.95 } : {}}
+                >
+                  Save Letter
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              className={`rounded-2xl shadow-xl p-8 max-w-3xl w-full ${currentTheme.card} border ${currentTheme.border} text-center`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h1 className={`text-5xl font-bold mb-6 ${currentTheme.text} font-['Caveat']`}>
+                Friend's Diary Space
+              </h1>
+              <p className={`text-lg mb-8 ${currentTheme.secondaryText}`}>
+                Letters are private and cannot be viewed
+              </p>
+              
+              <div className="flex justify-center">
+                <img 
+                  src="https://i.pinimg.com/736x/77/a0/a8/77a0a85d4deebcb0d90244788847e3a4.jpg" 
+                  alt="No entries" 
+                  className="w-48 opacity-70" 
+                />
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
@@ -491,4 +556,4 @@ const SelfDiary = () => {
   );
 };
 
-export default SelfDiary;
+export default DiarySpace;

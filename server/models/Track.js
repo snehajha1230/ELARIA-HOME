@@ -1,11 +1,17 @@
-// server/models/Track.js
 import mongoose from 'mongoose';
 
 const trackSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
-    artist: { type: String, trim: true, default: '' },
-
+    title: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    artist: { 
+      type: String, 
+      trim: true, 
+      default: '' 
+    },
     coverUrl: {
       type: String,
       required: true,
@@ -17,20 +23,26 @@ const trackSchema = new mongoose.Schema(
         message: 'Invalid image URL format (must end with .jpg, .png, etc.)',
       },
     },
-
     trackUrl: {
       type: String,
       required: true,
       trim: true,
       validate: {
         validator: function (v) {
-          return /^https?:\/\/.+/.test(v); // Accept any valid http/https link
+          return /^https?:\/\/.+/.test(v);
         },
         message: 'Invalid track URL',
       },
     },
-
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User', 
+      required: true 
+    },
+    isPublic: {
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true }
 );

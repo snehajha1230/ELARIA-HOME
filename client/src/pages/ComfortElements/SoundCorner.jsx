@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaTrash, FaMusic, FaSearch, FaHome, FaPlay, FaEdit } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const SoundCorner = () => {
+  const { state } = useLocation();
+  const viewOnly = state?.viewOnly || false;
   const [tracks, setTracks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [darkMode, setDarkMode] = useState(
@@ -14,19 +16,26 @@ const SoundCorner = () => {
   const navigate = useNavigate();
 
   const fetchTracks = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('/tracks', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      
+      // For view-only mode, fetch public tracks from friend's collection
+      const endpoint = viewOnly && state?.friendId 
+        ? `/tracks/public/${state.friendId}`
+        : '/tracks';
+      
+      const res = await axios.get(endpoint, config);
       setTracks(res.data);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to load tracks');
+      toast.error(viewOnly ? 'Failed to load tracks' : 'Failed to load your tracks');
     }
   };
 
   const handleDelete = async (id) => {
+    if (viewOnly) return;
+    
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`/tracks/${id}`, {
@@ -40,6 +49,7 @@ const SoundCorner = () => {
   };
 
   const handleEdit = (track) => {
+    if (viewOnly) return;
     navigate('/add-track', { state: { trackToEdit: track } });
   };
 
@@ -56,7 +66,7 @@ const SoundCorner = () => {
       setDarkMode(prefersDark);
       localStorage.setItem('darkMode', prefersDark);
     }
-  }, []);
+  }, [viewOnly, state?.friendId]);
 
   useEffect(() => {
     if (darkMode) {
@@ -74,7 +84,9 @@ const SoundCorner = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/10 dark:bg-gray-800/90 shadow-lg border border-purple-300/20">
           <div className="flex items-center mb-4 md:mb-0">
             <FaMusic className="text-3xl mr-3 text-purple-400" />
-            <h1 className="text-4xl font-serif font-bold text-purple-100">Your Music Room</h1>
+            <h1 className="text-4xl font-serif font-bold text-purple-100">
+              {viewOnly ? "Friend's Music Room" : "Your Music Room"}
+            </h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -82,7 +94,7 @@ const SoundCorner = () => {
               <FaSearch className="absolute left-3 top-3 text-purple-300" />
               <input
                 type="text"
-                placeholder="Search your tracks..."
+                placeholder="Search tracks..."
                 className="pl-10 pr-4 py-2 rounded-full bg-white/10 dark:bg-gray-700 border border-purple-300/30 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-500 text-purple-100 placeholder-purple-300/70"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -90,10 +102,10 @@ const SoundCorner = () => {
             </div>
             
             <button 
-              onClick={() => navigate('/comfort-space')}
+              onClick={() => navigate(viewOnly ? '/friendscommunity' : '/comfort-space')}
               className="p-2 rounded-full bg-purple-600/30 dark:bg-gray-700 text-purple-200 dark:text-purple-300 hover:bg-purple-700/40 dark:hover:bg-gray-600 transition"
-              title="Go to Comfort Space"
-              aria-label="Go to Comfort Space"
+              title={viewOnly ? "Go to Friends" : "Go to Comfort Space"}
+              aria-label={viewOnly ? "Go to Friends" : "Go to Comfort Space"}
             >
               <FaHome />
             </button>
@@ -102,16 +114,18 @@ const SoundCorner = () => {
 
         {/* Main Shelf Area */}
         <main className="bg-white/10 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-purple-300/20">
-          {/* Add Track Button */}
-          <div className="flex justify-end mb-8">
-            <button
-              onClick={() => navigate('/add-track')}
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <FaPlus />
-              <span>Add My Favourites</span>
-            </button>
-          </div>
+          {/* Add Track Button - Hidden in view-only mode */}
+          {!viewOnly && (
+            <div className="flex justify-end mb-8">
+              <button
+                onClick={() => navigate('/add-track')}
+                className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <FaPlus />
+                <span>Add My Favourites</span>
+              </button>
+            </div>
+          )}
 
           {/* Tracks Grid */}
           {tracks.length === 0 ? (
@@ -121,8 +135,12 @@ const SoundCorner = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
-              <p className="mt-6 text-xl text-purple-200">Your music room is silent... 🎵</p>
-              <p className="text-sm text-purple-300/80">Add your favorite tracks to fill it with melody.</p>
+              <p className="mt-6 text-xl text-purple-200">
+                {viewOnly ? "No public tracks to display" : "Your music room is silent... 🎵"}
+              </p>
+              {!viewOnly && (
+                <p className="text-sm text-purple-300/80">Add your favorite tracks to fill it with melody.</p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -175,39 +193,31 @@ const SoundCorner = () => {
                         {track.album}
                       </p>
                     )}
-                    {/* <div className="flex justify-between items-center">
-                      <span className="inline-block bg-purple-900/30 dark:bg-purple-900 text-purple-200 dark:text-purple-200 px-3 py-1 text-xs rounded-full">
-                        {track.genre || 'Various'}
-                      </span>
-                      {track.duration && (
-                        <span className="text-xs text-purple-300/80 dark:text-gray-400">
-                          {track.duration}
-                        </span>
-                      )}
-                    </div> */}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-3 right-3 flex space-x-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(track);
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaEdit size={14} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(track._id);
-                      }}
-                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaTrash size={14} />
-                    </button>
-                  </div>
+                  {/* Action Buttons - Hidden in view-only mode */}
+                  {!viewOnly && (
+                    <div className="absolute top-3 right-3 flex space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(track);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(track._id);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -216,8 +226,12 @@ const SoundCorner = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-purple-300/80 dark:text-gray-400">
-          <p>Your personal music room • {tracks.length} tracks in your collection</p>
-          <p className="mt-1">"Where words fail, music speaks." — Hans Christian Andersen</p>
+          <p>
+            {viewOnly ? "Viewing friend's collection" : "Your personal music room"} • {tracks.length} tracks
+          </p>
+          {!viewOnly && (
+            <p className="mt-1">"Where words fail, music speaks." — Hans Christian Andersen</p>
+          )}
         </footer>
       </div>
     </div>

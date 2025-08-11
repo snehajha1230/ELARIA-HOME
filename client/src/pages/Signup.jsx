@@ -22,7 +22,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://elaria-server.onrender.com/api/auth/signup', {
+      const res = await axios.post('http://localhost:5000/api/auth/signup', {
         username: formData.username,
         age: formData.age,
         email: formData.email,
@@ -111,6 +111,13 @@ const Signup = () => {
               className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
+          <button
+            type="button"
+            onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 hover:bg-gray-100 transition">
+            <img src="https://images.icon-icons.com/2108/PNG/512/google_icon_130924.png" alt="google" className="w-5 h-5" />
+            Continue with Google
+          </button>
 
           <button
             type="submit"

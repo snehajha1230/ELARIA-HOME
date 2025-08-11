@@ -1,4 +1,3 @@
-// server/models/Media.js
 import mongoose from 'mongoose';
 
 const mediaSchema = new mongoose.Schema(
@@ -29,6 +28,10 @@ const mediaSchema = new mongoose.Schema(
     mediaUrl: {
       type: String,
       required: true,
+    },
+    isPublic: {
+      type: Boolean,
+      default: true, 
     },
   },
   { timestamps: true }

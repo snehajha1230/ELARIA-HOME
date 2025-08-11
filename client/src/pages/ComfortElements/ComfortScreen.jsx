@@ -1,28 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaTrash, FaFilm, FaSearch, FaPlay, FaHome, FaEdit } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const ComfortScreen = () => {
+  const { state } = useLocation();
+  const viewOnly = state?.viewOnly || false;
   const [mediaList, setMediaList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const fetchMedia = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('/media', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      
+      // For view-only mode, fetch public media from friend's collection
+      const endpoint = viewOnly && state?.friendId 
+        ? `/media/public/${state.friendId}`
+        : '/media';
+      
+      const res = await axios.get(endpoint, config);
       setMediaList(res.data);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to load media');
+      toast.error(viewOnly ? 'Failed to load media' : 'Failed to load your media');
     }
   };
 
   const handleDelete = async (id) => {
+    if (viewOnly) return;
+    
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`/media/${id}`, {
@@ -36,6 +45,7 @@ const ComfortScreen = () => {
   };
 
   const handleEdit = (media) => {
+    if (viewOnly) return;
     navigate('/add-media', { state: { mediaToEdit: media } });
   };
 
@@ -54,7 +64,7 @@ const ComfortScreen = () => {
 
   useEffect(() => {
     fetchMedia();
-  }, []);
+  }, [viewOnly, state?.friendId]);
 
   return (
     <div className="min-h-screen bg-fixed bg-center py-8 px-4 bg-gradient-to-br from-gray-900 to-blue-900 dark:from-gray-900 dark:to-gray-800">
@@ -67,7 +77,9 @@ const ComfortScreen = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-blue-100 dark:border-gray-700">
           <div className="flex items-center mb-4 md:mb-0">
             <FaFilm className="text-3xl mr-3 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-4xl font-serif font-bold text-blue-800 dark:text-blue-200">Your Screen Room</h1>
+            <h1 className="text-4xl font-serif font-bold text-blue-800 dark:text-blue-200">
+              {viewOnly ? "Friend's Screen Room" : "Your Screen Room"}
+            </h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -75,7 +87,7 @@ const ComfortScreen = () => {
               <FaSearch className="absolute left-3 top-3 text-gray-500" />
               <input
                 type="text"
-                placeholder="Search your media..."
+                placeholder="Search media..."
                 className="pl-10 pr-4 py-2 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -83,7 +95,7 @@ const ComfortScreen = () => {
             </div>
             
             <button 
-              onClick={() => navigate('/comfort-space')}
+              onClick={() => navigate(viewOnly ? '/friendscommunity' : '/comfort-space')}
               className="p-2 rounded-full bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-gray-600 transition"
             >
               <FaHome />
@@ -93,23 +105,33 @@ const ComfortScreen = () => {
 
         {/* Main Shelf Area */}
         <main className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-blue-100 dark:border-gray-700">
-          {/* Add Media Button */}
-          <div className="flex justify-end mb-8">
-            <button
-              onClick={() => navigate('/add-media')}
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <FaPlus />
-              <span>Add My Favourites</span>
-            </button>
-          </div>
+          {/* Add Media Button - Hidden in view-only mode */}
+          {!viewOnly && (
+            <div className="flex justify-end mb-8">
+              <button
+                onClick={() => navigate('/add-media')}
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <FaPlus />
+                <span>Add My Favourites</span>
+              </button>
+            </div>
+          )}
 
           {/* Media Grid */}
           {mediaList.length === 0 ? (
             <div className="text-center py-16">
-              <img src="https://cdn-icons-png.flaticon.com/512/3875/3875391.png" alt="No media" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your Screen Room is empty... 🎬</p>
-              <p className="text-sm text-gray-400">Add your favorite movies, shows or videos to relax with.</p>
+              <img 
+                src="https://cdn-icons-png.flaticon.com/512/3875/3875391.png" 
+                alt="No media" 
+                className="mx-auto w-56 opacity-80" 
+              />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">
+                {viewOnly ? "No public media to display" : "Your Screen Room is empty... 🎬"}
+              </p>
+              {!viewOnly && (
+                <p className="text-sm text-gray-400">Add your favorite movies, shows or videos to relax with.</p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -152,39 +174,31 @@ const ComfortScreen = () => {
                         {media.description}
                       </p>
                     )}
-                    {/* <div className="flex justify-between items-center">
-                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 text-xs rounded-full">
-                        {media.genre || 'General'}
-                      </span>
-                      {media.duration && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {media.duration}
-                        </span>
-                      )}
-                    </div> */}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-3 right-3 flex space-x-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(media);
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaEdit size={14} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(media._id);
-                      }}
-                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaTrash size={14} />
-                    </button>
-                  </div>
+                  {/* Action Buttons - Hidden in view-only mode */}
+                  {!viewOnly && (
+                    <div className="absolute top-3 right-3 flex space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(media);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(media._id);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -193,8 +207,12 @@ const ComfortScreen = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Your personal screen room • {mediaList.length} items to relax with</p>
-          <p className="mt-1">"Movies can and do have tremendous influence in shaping young lives." — Walt Disney</p>
+          <p>
+            {viewOnly ? "Viewing friend's collection" : "Your personal screen room"} • {mediaList.length} items
+          </p>
+          {!viewOnly && (
+            <p className="mt-1">"Movies can and do have tremendous influence in shaping young lives." — Walt Disney</p>
+          )}
         </footer>
       </div>
     </div>

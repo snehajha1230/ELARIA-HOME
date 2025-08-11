@@ -35,6 +35,14 @@ import TestSocket from "./pages/TestSocket";
 import GratitudeJournal from "./pages/Toolkit/GratitudeJournal";
 import MindfulnessPage from "./pages/Toolkit/Mindfulness";
 import FeatureGuide from "./pages/Toolkit/FeatureGuide";
+import Friends from "./pages/ComfortElements/Friends";
+import FriendHome from "./pages/ComfortElements/FriendHome";
+// import ResetPassword from "./pages/ResetPassword";
+import CompleteProfile from "./pages/CompleteProfile";
+import OAuthRedirectHandler from './components/OAuthRedirectHandler';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+
 
 function App() {
   return (
@@ -76,6 +84,15 @@ function App() {
           <Route path="/gratitude-journal" element={<PrivateRoute><GratitudeJournal /></PrivateRoute>} />
           <Route path="/mindfulness" element={<PrivateRoute><MindfulnessPage /></PrivateRoute>} />
           <Route path="/wellness-tools-guide" element={<PrivateRoute><FeatureGuide /></PrivateRoute>} />
+          <Route path="/friendscommunity" element={<PrivateRoute><Friends /></PrivateRoute>} />
+          <Route path="/friend-home/:friendId" element={<PrivateRoute><FriendHome /></PrivateRoute>} />
+          {/* <Route path="/reset-password/:token" element={<ResetPassword />} /> */}
+          <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/oauth-callback" element={<OAuthRedirectHandler />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          
                    
           {/* Catch-all for 404 */}
         </Routes>

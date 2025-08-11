@@ -1,29 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaTrash, FaBookOpen, FaSearch, FaHome, FaExternalLinkAlt, FaEdit } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const QuietLibrary = () => {
+  const { state } = useLocation();
+  const viewOnly = state?.viewOnly || false;
   const [books, setBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
   const fetchBooks = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('/books', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      
+      // For view-only mode, fetch public books from friend's collection
+      const endpoint = viewOnly && state?.friendId 
+        ? `/books/public/${state.friendId}`
+        : '/books';
+      
+      const res = await axios.get(endpoint, config);
       setBooks(res.data);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to load books');
+      toast.error(viewOnly ? 'Failed to load books' : 'Failed to load your books');
     }
   };
 
   const deleteBook = async (id) => {
+    if (viewOnly) return;
+    
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`/books/${id}`, {
@@ -37,6 +46,7 @@ const QuietLibrary = () => {
   };
 
   const handleEdit = (book) => {
+    if (viewOnly) return;
     navigate('/add-book', { state: { bookToEdit: book } });
   };
 
@@ -50,7 +60,7 @@ const QuietLibrary = () => {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setDarkMode(true);
     }
-  }, []);
+  }, [viewOnly, state?.friendId]);
 
   useEffect(() => {
     if (darkMode) {
@@ -71,7 +81,9 @@ const QuietLibrary = () => {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-amber-100 dark:border-gray-700">
           <div className="flex items-center mb-4 md:mb-0">
             <FaBookOpen className="text-3xl mr-3 text-amber-600 dark:text-amber-400" />
-            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">My Reading Room</h1>
+            <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">
+              {viewOnly ? "Friend's Reading Room" : "My Reading Room"}
+            </h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -79,7 +91,7 @@ const QuietLibrary = () => {
               <FaSearch className="absolute left-3 top-3 text-gray-500" />
               <input
                 type="text"
-                placeholder="Search your books..."
+                placeholder="Search books..."
                 className="pl-10 pr-4 py-2 rounded-full bg-white dark:bg-gray-700 border border-amber-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -87,9 +99,9 @@ const QuietLibrary = () => {
             </div>
             
             <button 
-              onClick={() => navigate('/comfort-space')}
+              onClick={() => navigate(viewOnly ? '/friendscommunity' : '/comfort-space')}
               className="p-2 rounded-full bg-amber-100 dark:bg-gray-700 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-gray-600 transition"
-              aria-label="Go to comfort space"
+              aria-label={viewOnly ? "Go to friends list" : "Go to comfort space"}
             >
               <FaHome />
             </button>
@@ -98,23 +110,33 @@ const QuietLibrary = () => {
 
         {/* Main Shelf Area */}
         <main className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-amber-100 dark:border-gray-700">
-          {/* Add Book Button */}
-          <div className="flex justify-end mb-8">
-            <button
-              onClick={() => navigate('/add-book')}
-              className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <FaPlus />
-              <span>Add My Favourites</span>
-            </button>
-          </div>
+          {/* Add Book Button - Hidden in view-only mode */}
+          {!viewOnly && (
+            <div className="flex justify-end mb-8">
+              <button
+                onClick={() => navigate('/add-book')}
+                className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <FaPlus />
+                <span>Add My Favourites</span>
+              </button>
+            </div>
+          )}
 
           {/* Books Grid */}
           {books.length === 0 ? (
             <div className="text-center py-16">
-              <img src="https://static.thenounproject.com/png/1433745-200.png" alt="No books" className="mx-auto w-56 opacity-80" />
-              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">Your shelf is waiting for stories... </p>
-              <p className="text-sm text-gray-400">Begin your collection with a book that speaks to your soul.</p>
+              <img 
+                src="https://static.thenounproject.com/png/1433745-200.png" 
+                alt="No books" 
+                className="mx-auto w-56 opacity-80" 
+              />
+              <p className="mt-6 text-xl text-gray-600 dark:text-gray-300">
+                {viewOnly ? "No public books to display" : "Your shelf is waiting for stories..."}
+              </p>
+              {!viewOnly && (
+                <p className="text-sm text-gray-400">Begin your collection with a book that speaks to your soul.</p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -157,7 +179,7 @@ const QuietLibrary = () => {
                     </div>
                   </div>
 
-                  {/* Book Details - Now clearly visible */}
+                  {/* Book Details */}
                   <div className="p-5 bg-white dark:bg-gray-700">
                     <h3 className="text-lg font-serif font-bold text-gray-800 dark:text-gray-100 mb-1 line-clamp-1">
                       {book.title}
@@ -182,30 +204,32 @@ const QuietLibrary = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-3 right-3 flex space-x-2">
-                    {/* Edit Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(book);
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaEdit size={14} />
-                    </button>
-                    
-                    {/* Delete Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteBook(book._id);
-                      }}
-                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <FaTrash size={14} />
-                    </button>
-                  </div>
+                  {/* Action Buttons - Hidden in view-only mode */}
+                  {!viewOnly && (
+                    <div className="absolute top-3 right-3 flex space-x-2">
+                      {/* Edit Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(book);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteBook(book._id);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -214,8 +238,12 @@ const QuietLibrary = () => {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Your personal reading room of stories • {books.length} books in your collection</p>
-          <p className="mt-1">"A room without books is like a body without a soul." — Cicero</p>
+          <p>
+            {viewOnly ? "Viewing friend's collection" : "Your personal reading room of stories"} • {books.length} books
+          </p>
+          {!viewOnly && (
+            <p className="mt-1">"A room without books is like a body without a soul." — Cicero</p>
+          )}
         </footer>
       </div>
     </div>

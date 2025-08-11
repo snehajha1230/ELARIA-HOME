@@ -15,7 +15,7 @@ const NotificationsPage = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'https://elaria-server.onrender.com', {
+    const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000', {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       withCredentials: true,

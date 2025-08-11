@@ -17,9 +17,9 @@ const poemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    thumbnailUrl: {
-      type: String,
-      default: '',
+    isPublic: {
+      type: Boolean,
+      default: true, 
     },
   },
   { timestamps: true }
