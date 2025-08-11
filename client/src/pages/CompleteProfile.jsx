@@ -37,7 +37,7 @@ const CompleteProfile = () => {
     }
     
     try {
-      const res = await axios.get(`http://localhost:5000/api/auth/check-username?username=${formData.username}`);
+      const res = await axios.get(`https://elaria-server.onrender.com/api/auth/check-username?username=${formData.username}`);
       if (!res.data.available) {
         setUsernameError(res.data.message);
         return false;
@@ -61,7 +61,7 @@ const CompleteProfile = () => {
         return;
       }
 
-      const res = await axios.post('http://localhost:5000/api/auth/complete-profile', {
+      const res = await axios.post('https://elaria-server.onrender.com/api/auth/complete-profile', {
         token,
         ...formData
       });
