@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { FaUserPlus, FaTrash, FaPhone, FaEnvelope, FaUser } from 'react-icons/fa';
+import { FaUserPlus, FaTrash, FaPhone, FaEnvelope, FaUser, FaHome } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Contacts = () => {
   const [contacts, setContacts] = useState([]);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [isAdding, setIsAdding] = useState(false);
+  const navigate = useNavigate();
 
   const fetchContacts = async () => {
     try {
@@ -62,6 +64,17 @@ const Contacts = () => {
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto">
+            {/* Home Icon */}
+            <motion.button
+              onClick={() => navigate('/support')}
+              whileHover={{ scale: 2 }}
+              whileTap={{ scale: 1.2 }}
+              className="absolute top-3 left-3 p-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              aria-label="Home"
+            >
+              <FaHome className="text-xl" />
+            </motion.button>
+
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -78,6 +91,7 @@ const Contacts = () => {
           </p>
         </motion.div>
 
+        
         {/* Add Contact Button */}
         <motion.div 
           className="flex justify-center mb-8"
@@ -121,7 +135,7 @@ const Contacts = () => {
                   <input
                     type="text"
                     name="name"
-                    placeholder="John Doe"
+                    placeholder="Contact Name"
                     value={form.name}
                     onChange={handleChange}
                     required
@@ -139,7 +153,7 @@ const Contacts = () => {
                   <input
                     type="email"
                     name="email"
-                    placeholder="john@example.com"
+                    placeholder="contact@example.com"
                     value={form.email}
                     onChange={handleChange}
                     className="w-full pl-10 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -156,7 +170,7 @@ const Contacts = () => {
                   <input
                     type="tel"
                     name="phone"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="(123) 456-7890"
                     value={form.phone}
                     onChange={handleChange}
                     className="w-full pl-10 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

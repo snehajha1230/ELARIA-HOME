@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { FaHome } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const ApplyHelper = () => {
   const [form, setForm] = useState({
@@ -41,6 +43,18 @@ const ApplyHelper = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="absolute top-4 left-4">
+                  {/* Home Icon */}
+                        <motion.button
+                          onClick={() => navigate('/support')}
+                          whileHover={{ scale: 2 }}
+                          whileTap={{ scale: 1.2 }}
+                          className="absolute top-0 left-0 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                          aria-label="Home"
+                        >
+                          <FaHome className="text-xl" />
+                        </motion.button>
+        </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           <div className="flex flex-col md:flex-row">
             {/* Left Side - Appreciation Content */}

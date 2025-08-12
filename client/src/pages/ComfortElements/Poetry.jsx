@@ -82,7 +82,7 @@ const Poetry = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <BookOpen className="text-3xl mr-3 text-rose-600 dark:text-rose-400" />
             <h1 className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-200">
-              {viewOnly ? "Friend's Poetry Room" : "Your Poetry Room"}
+              {viewOnly ? "Poetry Room" : "My Poetry Room"}
             </h1>
           </div>
           

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
+import {FaHome } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const moods = [
   { emoji: '😊', name: 'Happy', color: 'bg-yellow-100 dark:bg-yellow-900' },
@@ -17,6 +19,7 @@ const MoodTracker = () => {
   const [note, setNote] = useState('');
   const [latest, setLatest] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const fetchLatestMood = async () => {
     try {
@@ -75,6 +78,16 @@ const MoodTracker = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-6 text-gray-800 dark:text-white">
+              {/* Home Icon */}
+              <motion.button
+                onClick={() => navigate('/support')}
+                whileHover={{ scale: 2 }}
+                whileTap={{ scale: 1.2 }}
+                className="absolute top-3 left-3 p-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                aria-label="Home"
+              >
+                <FaHome className="text-xl" />
+              </motion.button>
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ y: -50, opacity: 0 }}

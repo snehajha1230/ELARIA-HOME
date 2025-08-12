@@ -4,6 +4,9 @@ import { FiTrash2, FiHome, FiSun, FiMoon, FiSettings, FiX, FiMusic, FiEdit } fro
 import axios from '../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import rain from '../../assets/audio/rain.mp3';
+import forest from '../../assets/audio/forest.mp3';
+import piano from '../../assets/audio/piano.mp3';
 
 const DiarySpace = () => {
   const { state } = useLocation();
@@ -26,11 +29,20 @@ const DiarySpace = () => {
   const [theme, setTheme] = useState('sunset');
 
   // Music options
-  const musicOptions = [
-    { name: 'Gentle Rain', url: '/assets/audio/rain.mp3' },
-    { name: 'Forest Ambience', url: '/assets/audio/forest.mp3' },
-    { name: 'Calm Piano', url: '/assets/audio/piano.mp3' }
-  ];
+   const musicOptions = [
+      {
+        name: 'Gentle Rain',
+        url: rain
+      },
+      {
+        name: 'Forest Ambience',
+        url: forest
+      },
+      {
+        name: 'Calm Piano',
+        url: piano
+      }
+    ];
 
   // Theme definitions
   const themes = {

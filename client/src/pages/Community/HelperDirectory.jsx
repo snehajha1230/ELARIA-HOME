@@ -3,6 +3,8 @@ import axios from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaHome } from 'react-icons/fa';
+
 
 const HelperDirectory = () => {
   const [helpers, setHelpers] = useState([]);
@@ -99,6 +101,18 @@ const HelperDirectory = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
       <div className="container mx-auto px-4 py-8">
+         <div className="absolute top-4 left-4">
+                                {/* Home Icon */}
+                                      <motion.button
+                                        onClick={() => navigate('/support')}
+                                        whileHover={{ scale: 2 }}
+                                        whileTap={{ scale: 1.2 }}
+                                        className="absolute top-0 left-0 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                        aria-label="Home"
+                                      >
+                                        <FaHome className="text-xl" />
+                                      </motion.button>
+                </div>
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

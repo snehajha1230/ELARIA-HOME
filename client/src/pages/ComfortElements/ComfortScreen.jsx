@@ -78,7 +78,7 @@ const ComfortScreen = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <FaFilm className="text-3xl mr-3 text-blue-600 dark:text-blue-400" />
             <h1 className="text-4xl font-serif font-bold text-blue-800 dark:text-blue-200">
-              {viewOnly ? "Friend's Screen Room" : "Your Screen Room"}
+              {viewOnly ? "Screen Room" : "My Screen Room"}
             </h1>
           </div>
           

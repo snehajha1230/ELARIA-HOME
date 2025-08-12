@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { FaHome } from 'react-icons/fa';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -80,7 +82,7 @@ const NotificationsPage = () => {
             }
           );
         } else if (data.status === 'declined') {
-          toast.error('Your chat request was declined');
+          toast.error('It seems the helper was unavailable at the moment and couldn’t accept your request. You’re welcome to try again shortly or reach out to someone else who’s available.');
         }
       } catch (err) {
         console.error('Failed to handle request update:', err);
@@ -89,7 +91,7 @@ const NotificationsPage = () => {
 
     const handleNewMessage = (chat) => {
       const otherParticipant = chat.participants?.find(p => p._id !== localStorage.getItem('userId'));
-      toast.info(`New message from ${otherParticipant?.name || 'user'}`, {
+      toast.info(`Check your chat requests, you might have a incoming request from ${otherParticipant?.name || 'user'}`, {
         onClick: () => handleOpenChat(chat._id)
       });
     };
@@ -169,6 +171,18 @@ const NotificationsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white p-4 md:p-6">
       <div className="max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/30 dark:border-gray-700/50">
+          <div className="absolute top-4 left-4">
+                    {/* Home Icon */}
+                    <motion.button
+                      onClick={() => navigate('/support')}
+                      whileHover={{ scale: 2 }}
+                      whileTap={{ scale: 1.2 }}
+                      className="absolute top-0 left-0 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      aria-label="Home"
+                    >
+                      <FaHome className="text-xl" />
+                    </motion.button>
+                      </div>
         {/* Header with gradient background */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-800 dark:to-indigo-800 p-6 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">

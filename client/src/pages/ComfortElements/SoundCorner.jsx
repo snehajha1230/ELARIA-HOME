@@ -85,7 +85,7 @@ const SoundCorner = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <FaMusic className="text-3xl mr-3 text-purple-400" />
             <h1 className="text-4xl font-serif font-bold text-purple-100">
-              {viewOnly ? "Friend's Music Room" : "Your Music Room"}
+              {viewOnly ? "Music Room" : "My Music Room"}
             </h1>
           </div>
           

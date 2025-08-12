@@ -82,7 +82,7 @@ const QuietLibrary = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <FaBookOpen className="text-3xl mr-3 text-amber-600 dark:text-amber-400" />
             <h1 className="text-4xl font-serif font-bold text-amber-800 dark:text-amber-200">
-              {viewOnly ? "Friend's Reading Room" : "My Reading Room"}
+              {viewOnly ? "Reading Room" : "My Reading Room"}
             </h1>
           </div>
           

@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaHeart, FaUserCheck,FaRegCommentDots, FaExclamationTriangle, FaPenFancy,FaTrashAlt, FaStickyNote, FaMusic, FaFilm, FaBook, FaPenAlt, FaEnvelope, FaHandsHelping, FaRobot, FaLeaf, FaUserCircle, FaSmile, FaBell, FaWind, FaMedal, FaHandHoldingHeart, FaSearch, FaUserFriends, FaPhoneAlt, FaFirstAid, FaHome, FaCouch } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const AboutPage = () => {
+  const navigate = useNavigate();
   const features = [
     {
       category: "Calm Clove",
@@ -14,7 +16,8 @@ const AboutPage = () => {
         { icon: <FaPenFancy />, title: "Poetry Room", desc: "Gentle verses with space to save those that touch your soul" },
         { icon: <FaBook />, title: "Reading Room", desc: "Your digital library filled with comforting books" },
         { icon: <FaTrashAlt />, title: "Let-Go Space", desc: "Private space to pour out your heart with release options" },
-        { icon: <FaStickyNote />, title: "Diary Space", desc: "Compose heartfelt letters to your past, present or future self" }
+        { icon: <FaStickyNote />, title: "Diary Space", desc: "Compose heartfelt letters to your past, present or future self" },
+        { icon: <FaUserFriends />, title: "Friends Community", desc: "Add friends and visit their public rooms in view-only mode to share comfort spaces" }
       ]
     },
     {
@@ -22,7 +25,6 @@ const AboutPage = () => {
       color: "bg-indigo-50 border-indigo-100 text-indigo-900",
       iconColor: "text-indigo-600",
       items: [
-
         { icon: <FaBell />, title: "Notifications", desc: "Receive gentle notifications and updates of your chat request from your support circle" },
         { icon: <FaUserCheck />, title: "Emergency Contacts", desc: "Add your trusted contacts" },
         { icon: <FaWind />, title: "Breathe", desc: "Guided breathing exercises for heavy moments or panic attacks" },
@@ -41,7 +43,6 @@ const AboutPage = () => {
       items: [
         { icon: <FaLeaf />, title: "Gentle Presence", desc: "Listens with patience and heartfelt understanding" },
         { icon: <FaRegCommentDots />, title: "Safe Space", desc: "Share your thoughts freely in a private, non-judgmental space" },
-
         { icon: <FaUserCircle />, title: "Always Here", desc: "24/7 companionship for lonely moments" },
       ]
     }
@@ -263,7 +264,7 @@ const AboutPage = () => {
             <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
               Step into Elaria, where your well being begins its journey.
             </p>
-            <motion.button 
+             <motion.button 
               whileHover={{ 
                 scale: 1.05, 
                 boxShadow: "0 8px 20px rgba(37, 99, 235, 0.3)",

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import {FaHome } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const assessmentTypes = {
   depression: {
@@ -81,45 +84,45 @@ const assessmentTypes = {
       return "Your responses indicate severe anxiety. Professional help is recommended to develop coping strategies.";
     }
   },
-  stress: {
-    title: "Stress Assessment",
-    description: "PSS is a validated tool for measuring perceived stress levels. Answer based on your feelings in the last month.",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
-    ),
-    questions: [
-      "In the last month, how often have you been upset because of something that happened unexpectedly?",
-      "In the last month, how often have you felt that you were unable to control the important things in your life?",
-      "In the last month, how often have you felt nervous and 'stressed'?",
-      "In the last month, how often have you felt confident about your ability to handle your personal problems?",
-      "In the last month, how often have you felt that things were going your way?",
-      "In the last month, how often have you found that you could not cope with all the things that you had to do?",
-      "In the last month, how often have you been able to control irritations in your life?",
-      "In the last month, how often have you felt that you were on top of things?",
-      "In the last month, how often have you been angered because of things that were outside of your control?",
-      "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?"
-    ],
-    options: [
-      "Never",
-      "Almost never",
-      "Sometimes",
-      "Fairly often",
-      "Very often"
-    ],
-    scoring: {
-      low: { max: 13, color: 'green', label: 'Low stress' },
-      moderate: { max: 26, color: 'yellow', label: 'Moderate stress' },
-      high: { max: 40, color: 'red', label: 'High stress' }
-    },
-    maxScore: 40,
-    getSuggestion: (score) => {
-      if (score <= 13) return "Your responses suggest low stress levels. Maintain your healthy coping strategies.";
-      if (score <= 26) return "Your responses indicate moderate stress. Consider stress reduction techniques like exercise or meditation.";
-      return "Your responses suggest high stress levels that may benefit from professional support or lifestyle changes.";
-    }
-  },
+  // stress: {
+  //   title: "Stress Assessment",
+  //   description: "PSS is a validated tool for measuring perceived stress levels. Answer based on your feelings in the last month.",
+  //   icon: (
+  //     <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+  //     </svg>
+  //   ),
+  //   questions: [
+  //     "In the last month, how often have you been upset because of something that happened unexpectedly?",
+  //     "In the last month, how often have you felt that you were unable to control the important things in your life?",
+  //     "In the last month, how often have you felt nervous and 'stressed'?",
+  //     "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+  //     "In the last month, how often have you felt that things were going your way?",
+  //     "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+  //     "In the last month, how often have you been able to control irritations in your life?",
+  //     "In the last month, how often have you felt that you were on top of things?",
+  //     "In the last month, how often have you been angered because of things that were outside of your control?",
+  //     "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?"
+  //   ],
+  //   options: [
+  //     "Never",
+  //     "Almost never",
+  //     "Sometimes",
+  //     "Fairly often",
+  //     "Very often"
+  //   ],
+  //   scoring: {
+  //     low: { max: 13, color: 'green', label: 'Low stress' },
+  //     moderate: { max: 26, color: 'yellow', label: 'Moderate stress' },
+  //     high: { max: 40, color: 'red', label: 'High stress' }
+  //   },
+  //   maxScore: 40,
+  //   getSuggestion: (score) => {
+  //     if (score <= 13) return "Your responses suggest low stress levels. Maintain your healthy coping strategies.";
+  //     if (score <= 26) return "Your responses indicate moderate stress. Consider stress reduction techniques like exercise or meditation.";
+  //     return "Your responses suggest high stress levels that may benefit from professional support or lifestyle changes.";
+  //   }
+  // },
   panic: {
     title: "Panic Assessment",
     description: "PDSS-SR is a validated tool for assessing panic disorder symptoms. Answer based on your experiences.",
@@ -171,6 +174,7 @@ const DiagnoseYourself = () => {
   const [results, setResults] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const navigate = useNavigate();
 
   // Initialize answers for all assessments
   useEffect(() => {
@@ -273,8 +277,20 @@ const DiagnoseYourself = () => {
   };
 
   return (
+    
     <div className="min-h-screen py-8 px-4 sm:px-6 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100">
+              {/* Home Icon */}
+        <motion.button
+          onClick={() => navigate('/support')}
+          whileHover={{ scale: 2 }}
+          whileTap={{ scale: 1.2 }}
+          className="absolute top-3 left-3 p-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          aria-label="Home"
+        >
+          <FaHome className="text-xl" />
+        </motion.button>
       <div className="max-w-4xl mx-auto">
+        
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 p-4 rounded-full mb-4">
@@ -411,6 +427,7 @@ const DiagnoseYourself = () => {
             )}
           </button>
         </div>
+        
 
         {/* Results Section */}
         {results[activeTab] && (
@@ -500,6 +517,7 @@ const DiagnoseYourself = () => {
             </div>
           </div>
         </div> */}
+        
       </div>
     </div>
   );

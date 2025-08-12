@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaQuoteLeft, FaRegLightbulb, FaSeedling, FaRegSmile, FaHeart, FaSyncAlt } from 'react-icons/fa';
+import { FaQuoteLeft, FaRegLightbulb, FaSeedling, FaRegSmile, FaHeart, FaSyncAlt, FaHome } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const GratitudeJournal = () => {
   const [currentContent, setCurrentContent] = useState({});
+  const navigate = useNavigate();
 
   const motivationalQuotes = [
     {
@@ -120,6 +122,16 @@ const GratitudeJournal = () => {
           }}
         />
       </div>
+             {/* Home Icon */}
+        <motion.button
+          onClick={() => navigate('/support')}
+          whileHover={{ scale: 2 }}
+          whileTap={{ scale: 1.2 }}
+          className="absolute top-3 left-3 p-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          aria-label="Home"
+        >
+          <FaHome className="text-xl" />
+        </motion.button>
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}

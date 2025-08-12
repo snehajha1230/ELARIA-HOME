@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiMessageSquare, FiUser, FiClock, FiCheck, FiX } from 'react-icons/fi';
 import { RiChatNewLine } from 'react-icons/ri';
+import { FaHome } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const HelperDashboard = () => {
   const [requests, setRequests] = useState([]);
@@ -20,7 +22,7 @@ const HelperDashboard = () => {
         setRequests(res.data.data || []);
       } catch (err) {
         console.error('Failed to fetch requests:', err);
-        toast.error('Failed to load chat requests');
+        toast.error('No Chat Requests Found');
       }
     };
 
@@ -106,6 +108,18 @@ const HelperDashboard = () => {
   return (
     <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-6xl mx-auto">
+         <div className="absolute top-4 left-4">
+                {/* Home Icon */}
+                      <motion.button
+                        onClick={() => navigate('/support')}
+                        whileHover={{ scale: 2 }}
+                        whileTap={{ scale: 1.2 }}
+                        className="absolute top-0 left-0 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        aria-label="Home"
+                      >
+                        <FaHome className="text-xl" />
+                      </motion.button>
+                </div>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center">

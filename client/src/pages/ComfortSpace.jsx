@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FaMusic,
   FaFilm,
@@ -65,8 +65,12 @@ const defaultRoomConfig = [
 
 const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = React.useState(false);
   const [rooms, setRooms] = React.useState([]);
+  
+  // Get friendName from location state if in viewOnly mode
+  const friendName = viewOnly ? location.state?.friendName || "Friend's" : null;
 
   React.useEffect(() => {
     let isMounted = true;
@@ -105,7 +109,7 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
     return () => {
       isMounted = false;
     };
-  }, [viewOnly]);
+  }, [viewOnly, propRooms]);
 
   const toggleRoomPrivacy = async (roomId) => {
     if (viewOnly || loading) return;
@@ -134,7 +138,7 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
   const handleRoomClick = (room) => {
     navigate(room.path, { state: { 
         viewOnly: viewOnly,
-        friendId: room.friendId // This comes from the transformed rooms
+        friendId: room.friendId
       } });
   };
   const handleFriends = () => navigate('/friendscommunity');
@@ -195,7 +199,7 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
             <span className={`text-3xl font-serif font-bold tracking-wide ${darkMode ? 'text-[#f8e3d4]' : 'text-[#5a4a42]'}`}>ELARIA</span>
           </motion.div>
           <h1 className={`text-4xl md:text-5xl font-bold mt-4 font-serif tracking-tight leading-tight ${darkMode ? 'text-[#f8e3d4]' : 'text-[#5a4a42]'}`}>
-            {viewOnly ? "Friend's" : "Your"} <span className={darkMode ? 'text-[#b38a6d]' : 'text-[#8c6a56]'}>Comfort</span> Home
+            {viewOnly ? `${friendName}'s` : "Your"} <span className={darkMode ? 'text-[#b38a6d]' : 'text-[#8c6a56]'}>Comfort</span> Home
           </h1>
         </motion.div>
 
