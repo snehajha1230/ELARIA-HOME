@@ -114,9 +114,44 @@ const FriendHome = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: darkMode ? '#121212' : '#f5f5f5',
+        color: darkMode ? '#fff' : '#333'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '20px'
+        }}>
+          <div style={{
+            width: '50px',
+            height: '50px',
+            border: `5px solid ${darkMode ? '#333' : '#e0e0e0'}`,
+            borderTop: `5px solid ${darkMode ? '#4285f4' : '#1a73e8'}`,
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <p style={{
+            fontSize: '1.2rem',
+            fontWeight: '500'
+          }}>Loading {friendName}'s spaces...</p>
+        </div>
+        
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
   }
-
   if (error) {
     return (
       <div>
