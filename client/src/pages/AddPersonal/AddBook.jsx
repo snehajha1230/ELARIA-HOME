@@ -16,7 +16,20 @@ const AddBook = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [bookId, setBookId] = useState(null);
   const [coverPreview, setCoverPreview] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const [addMethod, setAddMethod] = useState(''); // 'manual' or 'google'
   const navigate = useNavigate();
+
+  // Common genres for dropdown
+  const commonGenres = [
+    'Fiction', 'Non-Fiction', 'Fantasy', 'Science Fiction', 'Mystery', 
+    'Thriller', 'Romance', 'Horror', 'Biography', 'History', 'Self-Help',
+    'Young Adult', 'Children', 'Poetry', 'Drama', 'Comedy', 'Adventure',
+    'Classic', 'Contemporary', 'Crime', 'Philosophy', 'Religion', 'Science',
+    'Travel', 'Cookbook', 'Art', 'Health', 'Psychology', 'Business'
+  ];
 
   useEffect(() => {
     if (location.state?.bookToEdit) {
@@ -25,8 +38,60 @@ const AddBook = () => {
       setCoverPreview(bookData.coverUrl);
       setIsEditMode(true);
       setBookId(_id);
+      setAddMethod('manual'); // In edit mode, default to manual
     }
   }, [location.state]);
+
+  // Function to search books using Google Books API
+  const searchBooks = async (query) => {
+    if (!query || query.length < 2 || addMethod !== 'google') {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5`
+      );
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        setSearchResults(data.items);
+        setShowResults(true);
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    } catch (error) {
+      console.error('Error searching books:', error);
+      setSearchResults([]);
+      setShowResults(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Function to handle book selection from search results
+  const handleBookSelect = (book) => {
+    const volumeInfo = book.volumeInfo;
+    const industryIdentifiers = volumeInfo.industryIdentifiers || [];
+    
+    setForm({
+      title: volumeInfo.title || '',
+      author: (volumeInfo.authors || []).join(', ') || '',
+      genre: volumeInfo.categories ? volumeInfo.categories[0] : '',
+      coverUrl: volumeInfo.imageLinks ? volumeInfo.imageLinks.thumbnail.replace('http:', 'https:') : '',
+      bookUrl: volumeInfo.previewLink || ''
+    });
+    
+    if (volumeInfo.imageLinks) {
+      setCoverPreview(volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'));
+    }
+    
+    setShowResults(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,6 +100,11 @@ const AddBook = () => {
     // Update cover preview when coverUrl changes
     if (name === 'coverUrl') {
       setCoverPreview(value);
+    }
+    
+    // Search books when title changes and Google Books is selected
+    if (name === 'title' && !isEditMode && addMethod === 'google') {
+      searchBooks(value);
     }
   };
 
@@ -96,7 +166,7 @@ const AddBook = () => {
                   <p className="text-sm text-amber-800 dark:text-amber-100">
                     {isEditMode
                       ? "Keeping your book details accurate helps you remember why each book is special to you."
-                      : "Personal libraries reflect our journey. Each book tells a story about when and why it joined your collection."}
+                      : "Choose how you'd like to add your book - manually or from Google Books!"}
                   </p>
                 </div>
               </div>
@@ -122,23 +192,136 @@ const AddBook = () => {
               </h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {['title', 'author', 'genre'].map((field) => (
-                <div key={field} className="group">
-                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                    {field}
-                  </label>
-                  <input
-                    type="text"
-                    name={field}
-                    value={form[field]}
-                    onChange={handleChange}
-                    required={field === 'title'}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
-                    placeholder={`Enter ${field}`}
-                  />
+            {!isEditMode && (
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  How would you like to add your book?
+                </p>
+                <div className="flex space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setAddMethod('manual')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      addMethod === 'manual'
+                        ? 'bg-amber-600 text-white shadow-md'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+                    }`}
+                  >
+                    Add Manually
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddMethod('google')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      addMethod === 'google'
+                        ? 'bg-amber-600 text-white shadow-md'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+                    }`}
+                  >
+                    Add from Google Books
+                  </button>
                 </div>
-              ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Title field with search functionality */}
+              <div className="group relative">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  title
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                  placeholder="Enter book title"
+                />
+                
+                {/* Search results dropdown - only show if Google Books is selected */}
+                {addMethod === 'google' && showResults && searchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {searchResults.map((book) => (
+                      <div
+                        key={book.id}
+                        className="p-3 hover:bg-amber-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-500 last:border-b-0"
+                        onClick={() => handleBookSelect(book)}
+                      >
+                        <div className="flex items-center">
+                          {book.volumeInfo.imageLinks && (
+                            <img
+                              src={book.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')}
+                              alt={book.volumeInfo.title}
+                              className="w-10 h-14 object-cover mr-3"
+                            />
+                          )}
+                          <div>
+                            <div className="font-medium text-gray-800 dark:text-white">
+                              {book.volumeInfo.title}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                              by {book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {addMethod === 'google' && isSearching && (
+                  <div className="absolute right-3 top-11">
+                    <svg className="animate-spin h-5 w-5 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              {/* Author field */}
+              <div className="group">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  author
+                </label>
+                <input
+                  type="text"
+                  name="author"
+                  value={form.author}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                  placeholder="Enter author"
+                />
+              </div>
+
+              {/* Genre field with dropdown */}
+              <div className="group">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  genre
+                </label>
+                <div className="relative">
+                  <select
+                    name="genre"
+                    value={form.genre}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 appearance-none"
+                  >
+                    <option value="">Select a genre</option>
+                    {commonGenres.map((genre) => (
+                      <option key={genre} value={genre}>
+                        {genre}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
 
               {/* Cover URL with Preview */}
               <div className="group">
@@ -189,10 +372,12 @@ const AddBook = () => {
               <div className="pt-4">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center ${isSubmitting 
+                  disabled={isSubmitting || (!isEditMode && !addMethod)}
+                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center ${
+                    isSubmitting || (!isEditMode && !addMethod)
                     ? 'bg-amber-400 dark:bg-amber-600 cursor-not-allowed' 
-                    : 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 shadow-md hover:shadow-lg'} text-white`}
+                    : 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 shadow-md hover:shadow-lg'
+                  } text-white`}
                 >
                   {isSubmitting ? (
                     <>

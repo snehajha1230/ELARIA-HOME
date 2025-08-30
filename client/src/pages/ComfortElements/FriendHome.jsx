@@ -140,7 +140,7 @@ const FriendHome = () => {
           <p style={{
             fontSize: '1.2rem',
             fontWeight: '500'
-          }}>Loading {friendName}'s spaces...</p>
+          }}>Loading Comfort Space..</p>
         </div>
         
         <style>{`
