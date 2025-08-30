@@ -21,14 +21,26 @@ const bookSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
-  coverUrl: {
-    type: String,
-    required: true,
-    validate: {
-      validator: url => /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif)$/i.test(url),
-      message: 'Invalid image URL format (must be JPG, PNG, etc.)',
-    }
-  },
+    coverUrl: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function (v) {
+          // Allow empty string if coverImage is uploaded instead
+          if (!v) return true;
+          
+          // Check if it's a valid URL with any extension or no extension
+          try {
+            const url = new URL(v);
+            // Allow any valid URL regardless of file extension
+            return url.protocol === 'http:' || url.protocol === 'https:';
+          } catch (e) {
+            return false;
+          }
+        },
+        message: 'Invalid URL format. Please provide a valid HTTP/HTTPS URL.',
+      },
+    },
   bookUrl: { 
     type: String,
     validate: {

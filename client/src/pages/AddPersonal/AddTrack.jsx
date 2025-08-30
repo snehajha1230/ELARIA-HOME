@@ -14,6 +14,7 @@ const AddTrack = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [trackId, setTrackId] = useState(null);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,9 +26,66 @@ const AddTrack = () => {
     }
   }, [location.state]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Function to extract video ID from YouTube URL
+  const extractYouTubeId = (url) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : false;
   };
+
+  // Function to extract track ID from Spotify URL
+  const extractSpotifyId = (url) => {
+    const regExp = /spotify\.com\/track\/([a-zA-Z0-9]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : false;
+  };
+
+  // Function to fetch track data from the backend
+  const fetchTrackData = async (url) => {
+    setIsFetchingData(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('/tracks/fetch-info', { url }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data) {
+        setForm(prev => ({
+          ...prev,
+          title: response.data.title || prev.title,
+          artist: response.data.artist || prev.artist,
+          coverUrl: response.data.coverUrl || prev.coverUrl
+        }));
+        toast.success('Track information fetched successfully!');
+      }
+    } catch (err) {
+      console.error('Error fetching track info:', err);
+      toast.error('Could not fetch track information. Please fill manually.');
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  // Handle track URL change with debounce for auto-fetching
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (form.trackUrl) {
+        const isYouTube = form.trackUrl.includes('youtube.com') || form.trackUrl.includes('youtu.be');
+        const isSpotify = form.trackUrl.includes('spotify.com');
+        
+        if ((isYouTube || isSpotify) && !form.title) {
+          fetchTrackData(form.trackUrl);
+        }
+      }
+    }, 1000); // Wait 1 second after typing stops
+
+    return () => clearTimeout(timer);
+  }, [form.trackUrl]); // Only re-run when trackUrl changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,21 +98,35 @@ const AddTrack = () => {
       return;
     }
 
-    if (!form.title || !form.trackUrl) {
-      toast.error('Title and track link are required');
+    if (!form.trackUrl || !form.title) {
+      toast.error('Track link and title are required');
       setIsSubmitting(false);
       return;
     }
 
     try {
+      // Prepare data to send to backend
+      const dataToSend = {
+        title: form.title,
+        artist: form.artist,
+        trackUrl: form.trackUrl,
+        coverUrl: form.coverUrl
+      };
+
       if (isEditing) {
-        await axios.put(`/tracks/${trackId}`, form, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.put(`/tracks/${trackId}`, dataToSend, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         toast.success('Track updated successfully!');
       } else {
-        await axios.post('/tracks', form, {
-          headers: { Authorization: `Bearer ${token}` }
+        await axios.post('/tracks', dataToSend, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         toast.success('Track added to your sound collection!');
       }
@@ -64,6 +136,15 @@ const AddTrack = () => {
       toast.error(err.response?.data?.message || 'Error saving your track');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Manual fetch button handler
+  const handleFetchData = () => {
+    if (form.trackUrl) {
+      fetchTrackData(form.trackUrl);
+    } else {
+      toast.error('Please enter a YouTube or Spotify link first');
     }
   };
 
@@ -106,7 +187,7 @@ const AddTrack = () => {
                     Pro Tip
                   </h3>
                   <p className="text-sm text-purple-200">
-                    Add tracks that resonate with your soul - nostalgic melodies, calming instrumentals, or uplifting beats.
+                    Paste a YouTube or Spotify link to automatically fill track information.
                   </p>
                 </div>
               </div>
@@ -133,6 +214,34 @@ const AddTrack = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="group">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                  Music Link (YouTube/Spotify) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="url"
+                    name="trackUrl"
+                    value={form.trackUrl}
+                    onChange={handleChange}
+                    placeholder="Paste YouTube or Spotify link here"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 pr-24"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleFetchData}
+                    disabled={isFetchingData || !form.trackUrl}
+                    className="absolute right-2 top-2 px-3 py-1.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isFetchingData ? 'Fetching...' : 'Auto-fill'}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Paste a YouTube or Spotify link to automatically fill the details below
+                </p>
+              </div>
+
               <div className="group">
                 <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
                   Title *
@@ -174,21 +283,20 @@ const AddTrack = () => {
                   placeholder="Paste an image link for album/cover art"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
                 />
-              </div>
-
-              <div className="group">
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
-                  Track Link *
-                </label>
-                <input
-                  type="url"
-                  name="trackUrl"
-                  value={form.trackUrl}
-                  onChange={handleChange}
-                  required
-                  placeholder="Where can we find this comfort track?"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
-                />
+                
+                {form.coverUrl && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Cover preview:</p>
+                    <img 
+                      src={form.coverUrl} 
+                      alt="Cover preview" 
+                      className="h-20 w-20 object-cover rounded-md border border-gray-300"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-2">

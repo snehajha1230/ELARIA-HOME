@@ -68,9 +68,8 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
   const location = useLocation();
   const [loading, setLoading] = React.useState(false);
   const [rooms, setRooms] = React.useState([]);
-  
-  // Get friendName from location state if in viewOnly mode
-  const friendName = viewOnly ? location.state?.friendName || "Friend's" : null;
+
+  const friendName = viewOnly ? location.state?.friendName || "Friend" : null;
 
   React.useEffect(() => {
     let isMounted = true;
@@ -109,7 +108,7 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
     return () => {
       isMounted = false;
     };
-  }, [viewOnly, propRooms]);
+  }, [viewOnly]);
 
   const toggleRoomPrivacy = async (roomId) => {
     if (viewOnly || loading) return;
@@ -138,7 +137,7 @@ const ComfortSpace = ({ darkMode, viewOnly = false, rooms: propRooms = [] }) => 
   const handleRoomClick = (room) => {
     navigate(room.path, { state: { 
         viewOnly: viewOnly,
-        friendId: room.friendId
+        friendId: room.friendId // This comes from the transformed rooms
       } });
   };
   const handleFriends = () => navigate('/friendscommunity');

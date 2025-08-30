@@ -4,12 +4,41 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
+// Confirmation Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Confirm Deletion</h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const QuietLibrary = () => {
   const { state } = useLocation();
   const viewOnly = state?.viewOnly || false;
   const [books, setBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, bookId: null, bookTitle: '' });
   const navigate = useNavigate();
 
   const fetchBooks = async () => {
@@ -40,9 +69,18 @@ const QuietLibrary = () => {
       });
       toast.success('Book removed from your shelf');
       setBooks(books.filter((book) => book._id !== id));
+      setDeleteModal({ isOpen: false, bookId: null, bookTitle: '' });
     } catch {
       toast.error('Could not delete book');
     }
+  };
+
+  const openDeleteModal = (bookId, bookTitle) => {
+    setDeleteModal({
+      isOpen: true,
+      bookId,
+      bookTitle: `Are you sure you want to delete "${bookTitle}"?`
+    });
   };
 
   const handleEdit = (book) => {
@@ -74,6 +112,14 @@ const QuietLibrary = () => {
     <div className={`min-h-screen bg-fixed bg-center py-8 px-4 transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-[#f5f1e6]'}`}>
       {/* Wooden Shelf Background */}
       <div className={`fixed inset-0 bg-[url('/wooden-shelf-texture.png')] bg-repeat opacity-10 dark:opacity-5 pointer-events-none z-0`}></div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, bookId: null, bookTitle: '' })}
+        onConfirm={() => deleteBook(deleteModal.bookId)}
+        message={deleteModal.bookTitle}
+      />
       
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto">
@@ -222,7 +268,7 @@ const QuietLibrary = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteBook(book._id);
+                          openDeleteModal(book._id, book.title);
                         }}
                         className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       >

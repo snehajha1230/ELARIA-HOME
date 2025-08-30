@@ -4,6 +4,34 @@ import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 import { X, Plus, BookOpen, Search, Home, Edit } from 'lucide-react';
 
+// Confirmation Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Confirm Deletion</h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Poetry = () => {
   const { state } = useLocation();
   const viewOnly = state?.viewOnly || false;
@@ -11,6 +39,7 @@ const Poetry = () => {
   const [poems, setPoems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, poemId: null, poemTitle: '' });
   const navigate = useNavigate();
 
   const fetchPoems = async () => {
@@ -52,10 +81,19 @@ const Poetry = () => {
       });
       toast.success('Poem removed from your collection');
       setPoems(poems.filter((p) => p._id !== id));
+      setDeleteModal({ isOpen: false, poemId: null, poemTitle: '' });
     } catch (err) {
       console.error('Error deleting poem:', err);
       toast.error('Failed to delete poem');
     }
+  };
+
+  const openDeleteModal = (poemId, poemTitle) => {
+    setDeleteModal({
+      isOpen: true,
+      poemId,
+      poemTitle: `Are you sure you want to delete "${poemTitle}"?`
+    });
   };
 
   const handleEdit = (poem) => {
@@ -66,7 +104,8 @@ const Poetry = () => {
   const filteredPoems = poems.filter(poem => 
     poem.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (poem.author && poem.author.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (poem.excerpt && poem.excerpt.toLowerCase().includes(searchTerm.toLowerCase()))
+    (poem.excerpt && poem.excerpt.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (poem.content && poem.content.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   useEffect(() => {
@@ -76,6 +115,14 @@ const Poetry = () => {
   return (
     <div className={`min-h-screen bg-fixed bg-center py-8 px-4 bg-[#f9f5f0] dark:bg-gray-900`}>
       <div className={`fixed inset-0 bg-[url('/paper-texture.png')] bg-repeat opacity-15 dark:opacity-10 pointer-events-none z-0`}></div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, poemId: null, poemTitle: '' })}
+        onConfirm={() => handleDelete(deleteModal.poemId)}
+        message={deleteModal.poemTitle}
+      />
       
       <div className="relative z-10 max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-gray-800/90 shadow-lg border border-rose-100 dark:border-gray-700">
@@ -141,11 +188,12 @@ const Poetry = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" style={{ gridAutoRows: 'min-content' }}>
               {filteredPoems.map((poem) => (
                 <div
                   key={poem._id}
                   className="relative group bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-rose-100 dark:border-gray-600 hover:border-rose-300 dark:hover:border-rose-500"
+                  style={{ height: 'fit-content' }}
                 >
                   <div className="p-6">
                     {!viewOnly && (
@@ -157,7 +205,7 @@ const Poetry = () => {
                           <Edit size={20} />
                         </button>
                         <button
-                          onClick={() => handleDelete(poem._id)}
+                          onClick={() => openDeleteModal(poem._id, poem.title)}
                           className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
                           <X size={20} />
@@ -174,17 +222,29 @@ const Poetry = () => {
                           by {poem.author}
                         </p>
                       )}
-                      {poem.excerpt && (
+                      
+                      {/* Display content if available, otherwise show excerpt */}
+                      {poem.content ? (
                         <div className="relative">
                           <div className="absolute top-0 left-0 w-1 h-full bg-rose-200 dark:bg-rose-800 rounded-full"></div>
-                          <p className="pl-4 text-gray-700 dark:text-gray-300 font-light leading-relaxed line-clamp-5">
+                          <div className="pl-4">
+                            <p className="text-gray-700 dark:text-gray-300 font-light leading-relaxed whitespace-pre-line">
+                              {poem.content}
+                            </p>
+                          </div>
+                        </div>
+                      ) : poem.excerpt ? (
+                        <div className="relative">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-rose-200 dark:bg-rose-800 rounded-full"></div>
+                          <p className="pl-4 text-gray-700 dark:text-gray-300 font-light leading-relaxed">
                             {poem.excerpt}
                           </p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
 
-                    {poem.linkUrl && (
+                    {/* Show Read Full Poem button only for link-based poems */}
+                    {poem.linkUrl && !poem.content && (
                       <a
                         href={poem.linkUrl}
                         target="_blank"

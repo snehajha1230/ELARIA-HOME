@@ -14,19 +14,27 @@ const AddMedia = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [mediaId, setMediaId] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state?.mediaToEdit) {
       const { _id, title, type, thumbnailUrl, mediaUrl } = location.state.mediaToEdit;
       setForm({ title, type, thumbnailUrl, mediaUrl });
+      setThumbnailPreview(thumbnailUrl);
       setIsEditing(true);
       setMediaId(_id);
     }
   }, [location.state]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Update thumbnail preview when thumbnailUrl changes
+    if (name === 'thumbnailUrl') {
+      setThumbnailPreview(value);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -179,6 +187,22 @@ const AddMedia = () => {
                   placeholder="Paste an image link for visual comfort"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
                 />
+                {/* Thumbnail Preview */}
+                {thumbnailPreview && (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Preview:</p>
+                    <div className="relative w-32 h-48 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+                      <img 
+                        src={thumbnailPreview} 
+                        alt="Thumbnail preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="group">

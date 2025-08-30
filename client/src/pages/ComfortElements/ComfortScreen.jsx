@@ -4,11 +4,40 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../utils/api';
 import { toast } from 'react-toastify';
 
+// Confirmation Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Confirm Deletion</h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ComfortScreen = () => {
   const { state } = useLocation();
   const viewOnly = state?.viewOnly || false;
   const [mediaList, setMediaList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, mediaId: null, mediaTitle: '' });
   const navigate = useNavigate();
 
   const fetchMedia = async () => {
@@ -39,9 +68,18 @@ const ComfortScreen = () => {
       });
       toast.success('Media removed from your collection');
       setMediaList(mediaList.filter((media) => media._id !== id));
+      setDeleteModal({ isOpen: false, mediaId: null, mediaTitle: '' });
     } catch {
       toast.error('Could not delete media');
     }
+  };
+
+  const openDeleteModal = (mediaId, mediaTitle) => {
+    setDeleteModal({
+      isOpen: true,
+      mediaId,
+      mediaTitle: `Are you sure you want to delete "${mediaTitle}"?`
+    });
   };
 
   const handleEdit = (media) => {
@@ -70,6 +108,14 @@ const ComfortScreen = () => {
     <div className="min-h-screen bg-fixed bg-center py-8 px-4 bg-gradient-to-br from-gray-900 to-blue-900 dark:from-gray-900 dark:to-gray-800">
       {/* Background Texture */}
       <div className="fixed inset-0 bg-[url('/blue-texture.png')] bg-repeat opacity-10 dark:opacity-5 pointer-events-none z-0"></div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, mediaId: null, mediaTitle: '' })}
+        onConfirm={() => handleDelete(deleteModal.mediaId)}
+        message={deleteModal.mediaTitle}
+      />
       
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto">
@@ -166,7 +212,7 @@ const ComfortScreen = () => {
                     <h3 className="text-lg font-serif font-bold text-gray-800 dark:text-gray-100 mb-1 line-clamp-1">
                       {media.title}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-3 line-clamp-1">
+                    <p className="text-sm text-white bg-blue-500 px-2 py-1 rounded-md inline-block mb-3">
                       {media.type}
                     </p>
                     {media.description && (
@@ -191,7 +237,7 @@ const ComfortScreen = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(media._id);
+                          openDeleteModal(media._id, media.title);
                         }}
                         className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       >

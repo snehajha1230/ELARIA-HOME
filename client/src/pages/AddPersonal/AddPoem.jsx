@@ -10,9 +10,11 @@ const AddPoem = () => {
   const [form, setForm] = useState({
     title: '',
     author: '',
-    linkUrl: ''
+    linkUrl: '',
+    content: ''
   });
 
+  const [inputMethod, setInputMethod] = useState('link'); // 'link' or 'text'
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
@@ -22,8 +24,17 @@ const AddPoem = () => {
       setForm({
         title: poemToEdit.title,
         author: poemToEdit.author || '',
-        linkUrl: poemToEdit.linkUrl
+        linkUrl: poemToEdit.linkUrl || '',
+        content: poemToEdit.content || ''
       });
+      
+      // Determine input method based on what data exists
+      if (poemToEdit.content) {
+        setInputMethod('text');
+      } else {
+        setInputMethod('link');
+      }
+      
       setIsEditing(true);
     }
   }, [poemToEdit]);
@@ -32,12 +43,29 @@ const AddPoem = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleInputMethodChange = (method) => {
+    setInputMethod(method);
+    // Clear the other field when switching methods
+    if (method === 'link') {
+      setForm({...form, content: ''});
+    } else {
+      setForm({...form, linkUrl: ''});
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     const token = localStorage.getItem('token');
     if (!token) {
       toast.error('Please sign in to share your poetry');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate that at least one method is provided
+    if (!form.linkUrl && !form.content) {
+      toast.error('Please provide either a link or write your poem');
       setIsSubmitting(false);
       return;
     }
@@ -155,19 +183,66 @@ const AddPoem = () => {
                 />
               </div>
 
+              {/* Input Method Selection */}
               <div className="group">
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                  Poem or Article Link *
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  How would you like to share your poem? *
                 </label>
-                <input
-                  name="linkUrl"
-                  type="url"
-                  value={form.linkUrl}
-                  onChange={handleChange}
-                  required
-                  placeholder="Where can we find the full poem?"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 dark:focus:ring-rose-400 dark:focus:border-rose-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
-                />
+                <div className="flex space-x-4 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => handleInputMethodChange('link')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      inputMethod === 'link'
+                        ? 'bg-rose-600 text-white shadow-md'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    Share a Link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInputMethodChange('text')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      inputMethod === 'text'
+                        ? 'bg-rose-600 text-white shadow-md'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    Write Poem
+                  </button>
+                </div>
+                
+                {inputMethod === 'link' ? (
+                  <>
+                    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                      Poem or Article Link
+                    </label>
+                    <input
+                      name="linkUrl"
+                      type="url"
+                      value={form.linkUrl}
+                      onChange={handleChange}
+                      placeholder="Where can we find the full poem?"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 dark:focus:ring-rose-400 dark:focus:border-rose-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                      Your Poem *
+                    </label>
+                    <textarea
+                      name="content"
+                      value={form.content}
+                      onChange={handleChange}
+                      required={inputMethod === 'text'}
+                      rows="6"
+                      placeholder="Write your beautiful poem here..."
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 dark:focus:ring-rose-400 dark:focus:border-rose-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                    />
+                  </>
+                )}
               </div>
 
               <div className="pt-2">

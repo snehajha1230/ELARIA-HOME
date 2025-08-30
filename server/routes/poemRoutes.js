@@ -25,15 +25,20 @@ const verifyToken = (req, res, next) => {
 
 // POST: Add poem (default isPublic to true like mediaRoutes)
 router.post('/', verifyToken, async (req, res) => {
-  const { title, author, linkUrl, isPublic } = req.body;
-  if (!title || !linkUrl) return res.status(400).json({ message: 'Title and link are required' });
+  const { title, author, linkUrl, content, isPublic } = req.body;
+  
+  // Validate that either linkUrl or content is provided
+  if (!title || (!linkUrl && !content)) {
+    return res.status(400).json({ message: 'Title and either link or content are required' });
+  }
 
   try {
     const newPoem = new Poem({ 
       user: req.userId, 
       title, 
       author, 
-      linkUrl, 
+      linkUrl: linkUrl || '', // Allow empty if content is provided
+      content: content || '', // Allow empty if linkUrl is provided
       isPublic: isPublic !== undefined ? isPublic : true // Default to true like mediaRoutes
     });
     const saved = await newPoem.save();
@@ -46,8 +51,12 @@ router.post('/', verifyToken, async (req, res) => {
 
 // PUT: Update poem
 router.put('/:id', verifyToken, async (req, res) => {
-  const { title, author, linkUrl, excerpt, isPublic } = req.body;
-  if (!title || !linkUrl) return res.status(400).json({ message: 'Title and link are required' });
+  const { title, author, linkUrl, content, isPublic } = req.body;
+  
+  // Validate that either linkUrl or content is provided
+  if (!title || (!linkUrl && !content)) {
+    return res.status(400).json({ message: 'Title and either link or content are required' });
+  }
 
   try {
     const updatedPoem = await Poem.findOneAndUpdate(
@@ -55,7 +64,8 @@ router.put('/:id', verifyToken, async (req, res) => {
       { 
         title, 
         author, 
-        linkUrl, 
+        linkUrl: linkUrl || '',
+        content: content || '',
         isPublic: isPublic !== undefined ? isPublic : true 
       },
       { new: true }

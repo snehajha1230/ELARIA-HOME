@@ -12,23 +12,30 @@ const AddBook = () => {
     coverUrl: '',
     bookUrl: ''
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [bookId, setBookId] = useState(null);
+  const [coverPreview, setCoverPreview] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state?.bookToEdit) {
       const { _id, ...bookData } = location.state.bookToEdit;
       setForm(bookData);
+      setCoverPreview(bookData.coverUrl);
       setIsEditMode(true);
       setBookId(_id);
     }
   }, [location.state]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Update cover preview when coverUrl changes
+    if (name === 'coverUrl') {
+      setCoverPreview(value);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -116,10 +123,10 @@ const AddBook = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {['title', 'author', 'genre', 'coverUrl', 'bookUrl'].map((field) => (
+              {['title', 'author', 'genre'].map((field) => (
                 <div key={field} className="group">
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                    {field.replace(/Url$/, ' URL')}
+                    {field}
                   </label>
                   <input
                     type="text"
@@ -128,10 +135,56 @@ const AddBook = () => {
                     onChange={handleChange}
                     required={field === 'title'}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
-                    placeholder={`Enter ${field.replace(/Url$/, ' URL')}`}
+                    placeholder={`Enter ${field}`}
                   />
                 </div>
               ))}
+
+              {/* Cover URL with Preview */}
+              <div className="group">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  cover URL
+                </label>
+                <input
+                  type="text"
+                  name="coverUrl"
+                  value={form.coverUrl}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                  placeholder="Enter cover URL"
+                />
+                {/* Cover Preview */}
+                {coverPreview && (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Preview:</p>
+                    <div className="relative w-24 h-36 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600 shadow-sm">
+                      <img 
+                        src={coverPreview} 
+                        alt="Cover preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Book URL */}
+              <div className="group">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 capitalize transition-all duration-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  book URL
+                </label>
+                <input
+                  type="text"
+                  name="bookUrl"
+                  value={form.bookUrl}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                  placeholder="Enter book URL"
+                />
+              </div>
 
               <div className="pt-4">
                 <button
