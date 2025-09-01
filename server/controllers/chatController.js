@@ -34,7 +34,7 @@ export const requestChat = async (req, res) => {
     await Notification.create({
       recipient: helper.user._id,
       relatedRequest: request._id,
-      message: `New chat request from ${populatedRequest.requester.name}`,
+      message: `Check your chat requests, you might have a incoming request from ${populatedRequest.requester.name}`,
       type: 'request'
     });
 
@@ -144,7 +144,7 @@ export const respondToRequest = async (req, res) => {
       await Notification.create({
         recipient: request.requester._id,
         relatedRequest: request._id,
-        message: `${helper.user.name} declined your chat request`,
+        message: `It seems the helper ${helper.user.name} was unavailable at the moment and couldn’t accept your request. You’re welcome to try again shortly or reach out to someone else who’s available.`,
         type: 'decline'
       });
     }
