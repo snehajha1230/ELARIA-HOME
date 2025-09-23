@@ -16,18 +16,18 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
-  console.log("✅ Socket connected:", socket.id);
+  console.log("Socket connected:", socket.id);
 
   socket.on("pingTest", () => {
-    console.log("📥 Received ping from client");
+    console.log("Received ping from client");
     socket.emit("pongTest", "Pong from server");
   });
 
   socket.on("disconnect", (reason) => {
-    console.log("⚠️ Socket disconnected:", socket.id, reason);
+    console.log("Socket disconnected:", socket.id, reason);
   });
 });
 
 httpServer.listen(5050, () => {
-  console.log("🚀 Test server listening on http://localhost:5050");
+  console.log("Test server listening on http://localhost:5050");
 });
