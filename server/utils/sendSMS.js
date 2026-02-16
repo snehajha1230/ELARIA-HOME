@@ -29,7 +29,7 @@ export const sendEmergencySMS = async (phone, userName = 'Your friend') => {
 
     return response.data;
   } catch (error) {
-    console.error('❌ MSG91 SMS Error:', error?.response?.data || error);
+    console.error('MSG91 SMS Error:', error?.response?.data || error);
     return null;
   }
 };

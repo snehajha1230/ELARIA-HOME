@@ -1,4 +1,4 @@
-import { getGroqResponse } from '../utils/groq.js';
+import { getGeminiResponse } from '../utils/gemini.js';
 
 export const handleTextAI = async (req, res) => {
   const { message } = req.body;
@@ -8,10 +8,10 @@ export const handleTextAI = async (req, res) => {
   }
 
   try {
-    const reply = await getGroqResponse(message);
+    const reply = await getGeminiResponse(message);
     res.json({ reply });
   } catch (error) {
-    console.error('Groq Error:', error);
+    console.error('Gemini Error:', error);
     res.status(500).json({ error: 'Failed to get AI response' });
   }
 };

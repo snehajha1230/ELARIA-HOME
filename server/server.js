@@ -36,7 +36,7 @@ const httpServer = createServer(app);
 // Socket.IO Setup (with proper CORS)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'https://elaria-home.onrender.com',
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true
   },
@@ -44,13 +44,13 @@ const io = new Server(httpServer, {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://elaria-home.onrender.com',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
 
 // Log CORS origin
-console.log('CORS allowed origin:', process.env.CLIENT_URL || 'https://elaria-home.onrender.com');
+console.log('CORS allowed origin:', process.env.CLIENT_URL || 'http://localhost:5173');
 
 // === Socket.IO Events ===
 io.on('connection', (socket) => {
@@ -138,7 +138,7 @@ app.use(passport.session());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => console.error('MongoDB connection error:', err));

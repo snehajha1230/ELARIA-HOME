@@ -22,7 +22,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when submitting
     try {
-      const res = await axios.post('https://elaria-server.onrender.com/api/auth/login', formData);
+      const res = await axios.post('http://localhost:5001/api/auth/login', formData);
       
       // Ensure token and user are stored correctly
       const { token, user } = res.data;
