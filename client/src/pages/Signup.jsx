@@ -24,7 +24,7 @@ const Signup = () => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when submitting
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/signup', {
+      const res = await axios.post('https://elaria-server.onrender.com/api/auth/signup', {
         username: formData.username,
         age: formData.age,
         email: formData.email,
