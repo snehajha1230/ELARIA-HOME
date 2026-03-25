@@ -3,22 +3,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, 
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 10000,
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP ERROR:", error);
-  } else {
-    console.log("SMTP READY");
-  }
 });
 
 export const sendEmergencyEmail = async (to, userName = 'Your friend') => {
@@ -37,3 +26,4 @@ export const sendEmergencyEmail = async (to, userName = 'Your friend') => {
 
   return transporter.sendMail(mailOptions);
 };
+
