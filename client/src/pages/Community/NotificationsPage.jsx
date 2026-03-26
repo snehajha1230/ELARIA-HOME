@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from '../../utils/api';
+import axios, { backendUrl } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { motion } from 'framer-motion';
@@ -17,7 +17,7 @@ const NotificationsPage = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'https://elaria-server.onrender.com', {
+    const newSocket = io(backendUrl, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       withCredentials: true,

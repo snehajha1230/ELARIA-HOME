@@ -1,7 +1,7 @@
 // ChatWindow.jsx
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from '../../utils/api';
+import axios, { backendUrl } from '../../utils/api';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -56,7 +56,7 @@ const ChatWindow = () => {
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'https://elaria-server.onrender.com').replace(/\/$/, '');
+    const socketUrl = backendUrl;
     const newSocket = io(socketUrl, {
       path: '/socket.io',
       reconnection: true,

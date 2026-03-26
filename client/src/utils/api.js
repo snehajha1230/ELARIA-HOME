@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Central place to configure your backend URL for both REST + Socket.IO.
+// Update only this file (or set `VITE_API_BASE_URL`) when deploying.
+export const backendUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001').replace(/\/$/, '');
+
 const instance = axios.create({
-  baseURL: 'https://elaria-server.onrender.com/api',
+  baseURL: `${backendUrl}/api`,
 });
 
 instance.interceptors.request.use(

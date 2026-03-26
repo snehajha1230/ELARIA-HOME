@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { backendUrl } from '../utils/api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; 
@@ -24,7 +24,7 @@ const Signup = () => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when submitting
     try {
-      const res = await axios.post('https://elaria-server.onrender.com/api/auth/signup', {
+      const res = await axios.post('/auth/signup', {
         username: formData.username,
         age: formData.age,
         email: formData.email,
@@ -116,7 +116,7 @@ const Signup = () => {
           </div>
           <button
             type="button"
-            onClick={() => window.location.href = 'https://elaria-server.onrender.com/api/auth/google'}
+            onClick={() => window.location.href = `${backendUrl}/api/auth/google`}
             className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 hover:bg-gray-100 transition">
             <img src="https://images.icon-icons.com/2108/PNG/512/google_icon_130924.png" alt="google" className="w-5 h-5" />
             Sign Up with Google

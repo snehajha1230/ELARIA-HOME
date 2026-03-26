@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../utils/api';
+import axios, { backendUrl } from '../../utils/api';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -26,7 +26,7 @@ const HelperDashboard = () => {
       }
     };
 
-    const newSocket = io('https://elaria-server.onrender.com', {
+    const newSocket = io(backendUrl, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });

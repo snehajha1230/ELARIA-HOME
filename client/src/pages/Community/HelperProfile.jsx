@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from '../../utils/api';
+import axios, { backendUrl } from '../../utils/api';
 import { FaUserCircle } from 'react-icons/fa';
 import { io } from 'socket.io-client';
 
@@ -22,7 +22,7 @@ const HelperProfile = () => {
       }
     };
 
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(backendUrl);
     setSocket(newSocket);
 
     fetchHelper();
