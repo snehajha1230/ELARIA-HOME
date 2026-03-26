@@ -1,41 +1,18 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import sgMail from "@sendgrid/mail";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 15000, 
-  greetingTimeout: 10000,
-  socketTimeout: 20000,
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const verifyTransporter = async () => {
+export const sendEmergencyEmail = async (to, userName = "Your friend") => {
   try {
-    await transporter.verify();
-    console.log('SMTP server is ready to send emails');
-  } catch (error) {
-    console.error('SMTP connection failed:', error.message);
-  }
-};
-
-verifyTransporter();
-
-// Send SOS Email
-export const sendEmergencyEmail = async (to, userName = 'Your friend') => {
-  try {
-    const mailOptions = {
-      from: `"Elaria SOS" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to,
-      subject: '🚨 SOS Alert from Elaria',
+      from: process.env.EMAIL_USER, 
+      subject: "🚨 SOS Alert from Elaria",
       html: `
-        <h2>🚨 Emergency Alert</h2>
+        <h2>Emergency Alert</h2>
         <p><strong>${userName}</strong> may be in distress and needs your help.</p>
         <p>Please check on them immediately.</p>
         <hr />
@@ -43,13 +20,13 @@ export const sendEmergencyEmail = async (to, userName = 'Your friend') => {
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const response = await sgMail.send(msg);
 
-    console.log('Email sent:', info.response);
-    return info;
+    console.log("Email sent via SendGrid");
+    return response;
 
   } catch (error) {
-    console.error('Email sending failed:', error);
-    throw new Error('Email failed: ' + error.message);
+    console.error("SendGrid Error:", error.response?.body || error.message);
+    throw new Error("Email failed: " + error.message);
   }
 };
