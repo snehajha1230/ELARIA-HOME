@@ -16,7 +16,21 @@ export const triggerSOS = async (req, res) => {
     const results = [];
 
     for (const contact of contacts) {
-      const emailResult = contact.email ? await sendEmergencyEmail(contact.email, user.name || 'Your friend') : null;
+      let emailResult = null;
+      let emailError = null;
+
+      if (contact.email) {
+        try {
+          emailResult = await sendEmergencyEmail(contact.email, user.name || 'Your friend');
+        } catch (e) {
+          emailError = e?.message || 'Email failed';
+          console.error('SOS email failed for contact:', {
+            to: contact.email,
+            error: emailError,
+          });
+        }
+      }
+
       const smsResult = contact.phone ? await sendEmergencySMS(contact.phone, user.name || 'Your friend') : null;
       const whatsappResult = contact.phone ? await sendEmergencyWhatsApp(contact.phone, user.name || 'Your friend') : null;
 
@@ -35,6 +49,7 @@ export const triggerSOS = async (req, res) => {
         emailStatus: emailResult?.accepted || null,
         emailMessageId: emailResult?.messageId || null,
         emailSendGridStatusCode: null,
+        emailError,
         smsStatus: smsResult || null,
         whatsappStatus: whatsappResult || null,
       });
@@ -43,6 +58,7 @@ export const triggerSOS = async (req, res) => {
     res.status(200).json({ message: 'SOS triggered: Email, SMS, WhatsApp sent.', results });
   } catch (err) {
     console.error('❌ SOS trigger error:', err);
-    res.status(500).json({ message: 'Failed to trigger SOS' });
+    // Include error message for production debugging; avoids leaking secrets.
+    res.status(500).json({ message: 'Failed to trigger SOS', error: err?.message || 'Unknown error' });
   }
 };

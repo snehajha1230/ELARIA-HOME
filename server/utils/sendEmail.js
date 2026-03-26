@@ -58,7 +58,11 @@ export const sendEmergencyEmail = async (to, userName = "Your friend") => {
     return { accepted: true, messageId: info?.messageId || null, response: info || null };
 
   } catch (error) {
-    console.error("Nodemailer Error:", error.response?.body || error.message);
-    throw new Error("Email failed: " + error.message);
+    console.error("Nodemailer Error:", {
+      message: error?.message,
+      code: error?.code,
+      response: error?.response?.body || error?.response || null,
+    });
+    throw new Error("Email failed: " + (error?.code ? `${error.code} - ${error.message}` : error?.message || 'Unknown'));
   }
 };

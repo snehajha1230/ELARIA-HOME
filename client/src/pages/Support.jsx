@@ -37,8 +37,14 @@ const Support = () => {
 
   const handleSendSOS = async () => {
     try {
-      await axios.post('/sos');
-      toast.success('SOS alert sent to your emergency contacts!');
+      const res = await axios.post('/sos');
+      const results = res?.data?.results || [];
+      const emailErrors = results.map(r => r?.emailError).filter(Boolean);
+      if (emailErrors.length) {
+        toast.error(`SOS email failed: ${emailErrors[0]}`);
+      } else {
+        toast.success('SOS alert sent to your emergency contacts!');
+      }
     } catch (err) {
       console.error('SOS Error:', err);
       toast.error('Failed to send SOS email');
