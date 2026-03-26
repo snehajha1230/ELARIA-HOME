@@ -20,11 +20,21 @@ export const triggerSOS = async (req, res) => {
       const smsResult = contact.phone ? await sendEmergencySMS(contact.phone, user.name || 'Your friend') : null;
       const whatsappResult = contact.phone ? await sendEmergencyWhatsApp(contact.phone, user.name || 'Your friend') : null;
 
+      if (emailResult) {
+        console.log("SOS email result:", {
+          to: contact.email,
+          accepted: emailResult.accepted,
+          messageId: emailResult.messageId,
+        });
+      }
+
       results.push({
         email: contact.email || null,
         sms: contact.phone || null,
         whatsapp: contact.phone || null,
         emailStatus: emailResult?.accepted || null,
+        emailMessageId: emailResult?.messageId || null,
+        emailSendGridStatusCode: null,
         smsStatus: smsResult || null,
         whatsappStatus: whatsappResult || null,
       });
