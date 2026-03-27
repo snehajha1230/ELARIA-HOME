@@ -14,6 +14,7 @@ const NotificationsPage = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const navigate = useNavigate();
   const notificationRef = useRef(null);
+  const unreadCount = notifications.filter(notification => !notification.read).length;
 
   // Initialize socket connection
   useEffect(() => {
@@ -48,7 +49,7 @@ const NotificationsPage = () => {
 
     const handleRequestUpdate = async (data) => {
       try {
-        const res = await axios.get('/notifications');
+        const res = await axios.get('/notifications?includeRead=true');
         const updatedNotifications = res.data.data || [];
         
         // Ensure chatSession is properly included in notifications
@@ -117,7 +118,7 @@ const NotificationsPage = () => {
       try {
         const [activeChatsRes, notificationsRes] = await Promise.all([
           axios.get('/chat/active'),
-          axios.get('/notifications')
+          axios.get('/notifications?includeRead=true')
         ]);
         
         setActiveChats(activeChatsRes.data?.data?.map(chat => chat._id) || []);
@@ -147,13 +148,33 @@ const NotificationsPage = () => {
     navigate(`/chat/${chatId}`);
   };
 
-  const clearNotification = async (id) => {
+  const handleMarkAsRead = async (id) => {
     try {
       await axios.patch(`/notifications/${id}/read`);
-      setNotifications(prev => prev.filter(n => n._id !== id));
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification._id === id ? { ...notification, read: true } : notification
+        )
+      );
+      toast.success('Notification marked as read');
     } catch (err) {
-      console.error('Failed to clear notification:', err);
-      toast.error('Failed to update notification');
+      console.error('Failed to mark notification as read:', err);
+      toast.error('Failed to mark as read');
+    }
+  };
+
+  const handleDeleteNotification = async (id) => {
+    try {
+      try {
+        await axios.post(`/notifications/${id}/remove`);
+      } catch (removeErr) {
+        await axios.delete(`/notifications/${id}`);
+      }
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      toast.success('Notification deleted');
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+      toast.error('Failed to delete notification');
     }
   };
 
@@ -194,7 +215,7 @@ const NotificationsPage = () => {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">Your Notifications</h1>
               <p className="text-purple-100 dark:text-purple-200 text-sm">
-                {notifications.length} unread {notifications.length === 1 ? 'message' : 'messages'}
+                {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
               </p>
             </div>
           </div>
@@ -224,6 +245,9 @@ const NotificationsPage = () => {
               <div 
                 key={notification._id}
                 className={`p-5 rounded-xl border transition-all hover:shadow-md ${
+                  notification.read
+                    ? 'opacity-70'
+                    :
                   notification.type === 'accept' 
                     ? 'border-green-200 bg-green-50/80 dark:border-green-800/50 dark:bg-green-900/20 hover:border-green-300' 
                     : notification.type === 'decline'
@@ -260,16 +284,25 @@ const NotificationsPage = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {new Date(notification.createdAt).toLocaleString()}
                       </p>
+                      {notification.read && (
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Read</p>
+                      )}
                     </div>
                   </div>
-                  <button 
-                    onClick={() => clearNotification(notification._id)}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 ml-4 p-1 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition"
-                    aria-label="Dismiss notification"
+                </div>
+                <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <button
+                    onClick={() => handleMarkAsRead(notification._id)}
+                    disabled={notification.read}
+                    className="w-full sm:w-auto px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white transition-all"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
+                    {notification.read ? 'Marked as read' : 'Mark as read'}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteNotification(notification._id)}
+                    className="w-full sm:w-auto px-4 py-2 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/20 transition-all"
+                  >
+                    Remove
                   </button>
                 </div>
                 {notification.type === 'accept' && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiHome, FiSun, FiMoon, FiSettings, FiX, FiMusic, FiEdit } from 'react-icons/fi';
+import { FiHome, FiSun, FiMoon, FiSettings, FiX, FiMusic, FiEdit } from 'react-icons/fi';
 import axios from '../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -21,12 +21,12 @@ const DiarySpace = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   // State for UI customization
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('diaryDarkMode') === 'true');
   const [showSettings, setShowSettings] = useState(false);
   const [showMusicOptions, setShowMusicOptions] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [theme, setTheme] = useState('sunset');
+  const [theme, setTheme] = useState(() => localStorage.getItem('diaryTheme') || 'ocean');
 
   // Music options
    const musicOptions = [
@@ -164,9 +164,7 @@ const DiarySpace = () => {
     // Original backend logic for user mode
     setIsLoading(true);
     try {
-      const res = await axios.get('/diary', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await axios.get('/diary');
       const formattedEntries = res.data.map(entry => ({
         text: entry.content,
         time: new Date(entry.createdAt).toLocaleString(),
@@ -205,20 +203,6 @@ const DiarySpace = () => {
         console.error('Error saving entry:', err);
         toast.error('Failed to save diary entry');
       }
-    }
-  };
-
-  // Delete a diary entry (only for user mode)
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/diary/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
-      toast.success('Diary entry deleted');
-      setSavedEntries(savedEntries.filter((e) => e._id !== id));
-    } catch (err) {
-      console.error('Error deleting entry:', err);
-      toast.error('Failed to delete diary entry');
     }
   };
 
@@ -273,12 +257,15 @@ const DiarySpace = () => {
   // Fetch entries on component mount
   useEffect(() => {
     fetchEntries();
-    
-    // Set dark mode based on system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
   }, [viewOnly]);
+
+  useEffect(() => {
+    localStorage.setItem('diaryTheme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('diaryDarkMode', String(darkMode));
+  }, [darkMode]);
 
   return (
     <div className={`relative min-h-screen w-full bg-gradient-to-br ${currentTheme.bg} transition-colors duration-500`}>
@@ -452,17 +439,6 @@ const DiarySpace = () => {
                     {entry.time}
                   </h3>
                 </div>
-                {/* {!viewOnly && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(entry._id);
-                    }}
-                    className={`ml-4 ${darkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-500'}`}
-                  >
-                    <FiTrash2 size={18} />
-                  </button>
-                )} */}
               </motion.div>
             ))
           )}

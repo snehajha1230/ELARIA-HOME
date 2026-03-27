@@ -3,9 +3,17 @@ import ChatRequest from '../models/ChatRequest.js';
 
 export const getNotifications = async (req, res) => {
   try {
+    const includeRead = req.query.includeRead === 'true';
+    const filter = {
+      recipient: req.userId
+    };
+
+    if (!includeRead) {
+      filter.read = false;
+    }
+
     const notifications = await Notification.find({
-      recipient: req.userId,
-      read: false
+      ...filter
     })
     .populate({
       path: 'relatedRequest',
@@ -74,6 +82,33 @@ export const markNotificationAsRead = async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Failed to update notification'
+    });
+  }
+};
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({
+      _id: req.params.id,
+      recipient: req.userId
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Notification not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Notification deleted'
+    });
+  } catch (err) {
+    console.error('Delete notification error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete notification'
     });
   }
 };

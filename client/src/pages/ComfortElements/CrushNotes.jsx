@@ -10,8 +10,8 @@ const CrushNotes = () => {
   const [note, setNote] = useState('');
   const [crushed, setCrushed] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
-  const [theme, setTheme] = useState('sunset');
-  const [darkMode, setDarkMode] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('letgoTheme') || 'ocean');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('letgoDarkMode') === 'true');
   const [showSettings, setShowSettings] = useState(false);
   const [showMusicOptions, setShowMusicOptions] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
@@ -19,11 +19,12 @@ const CrushNotes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check user's preferred color scheme
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
-  }, []);
+    localStorage.setItem('letgoTheme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('letgoDarkMode', String(darkMode));
+  }, [darkMode]);
 
   const themes = {
     sunset: {

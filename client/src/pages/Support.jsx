@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FaStethoscope,
@@ -33,7 +33,21 @@ const Support = () => {
   const [activePath, setActivePath] = useState('discover');
   const [darkMode, setDarkMode] = useState(false);
   const [isHoveringSOS, setIsHoveringSOS] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const user = JSON.parse(localStorage.getItem('user'));
+
+  useEffect(() => {
+    const fetchUnreadNotifications = async () => {
+      try {
+        const res = await axios.get('/notifications');
+        setUnreadCount(res?.data?.data?.length || 0);
+      } catch (err) {
+        console.error('Failed to fetch unread notifications:', err);
+      }
+    };
+
+    fetchUnreadNotifications();
+  }, []);
 
   const handleSendSOS = async () => {
     try {
@@ -189,11 +203,15 @@ const Support = () => {
               >
                 <div className="relative">
                   <FaRegBell className="text-[#6b7bff] dark:text-[#a5b4fc]" />
-                  <motion.span 
-                    className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
+                  {unreadCount > 0 && (
+                    <motion.span
+                      className="absolute -top-2 -right-3 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </motion.span>
+                  )}
                 </div>
                 <span>Notifications</span>
               </motion.button>

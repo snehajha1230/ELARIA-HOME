@@ -15,6 +15,7 @@ const AddMedia = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [mediaId, setMediaId] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,45 @@ const AddMedia = () => {
     }
   }, [location.state]);
 
+  const fetchMediaData = async (url) => {
+    if (!url) return;
+
+    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    if (!isYouTube) return;
+
+    setIsFetchingData(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        '/media/fetch-info',
+        { url },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data) {
+        setForm((prev) => ({
+          ...prev,
+          title: response.data.title || prev.title,
+          thumbnailUrl: response.data.thumbnailUrl || prev.thumbnailUrl,
+          type: response.data.type || prev.type,
+        }));
+
+        if (response.data.thumbnailUrl) {
+          setThumbnailPreview(response.data.thumbnailUrl);
+        }
+
+        if (response.data.title || response.data.thumbnailUrl || response.data.type) {
+          toast.success('Media details fetched from YouTube!');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching media info:', err);
+      toast.error('Could not fetch YouTube details. Please fill manually.');
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -35,6 +75,35 @@ const AddMedia = () => {
     if (name === 'thumbnailUrl') {
       setThumbnailPreview(value);
     }
+  };
+
+  // Auto-fetch YouTube details after typing stops
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!form.mediaUrl) return;
+
+      const isYouTube = form.mediaUrl.includes('youtube.com') || form.mediaUrl.includes('youtu.be');
+      if (isYouTube && !form.title) {
+        fetchMediaData(form.mediaUrl);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [form.mediaUrl]);
+
+  const handleFetchData = () => {
+    if (!form.mediaUrl) {
+      toast.error('Please enter a YouTube link first');
+      return;
+    }
+
+    const isYouTube = form.mediaUrl.includes('youtube.com') || form.mediaUrl.includes('youtu.be');
+    if (!isYouTube) {
+      toast.info('Auto-fetch is available for YouTube links. Add other links manually.');
+      return;
+    }
+
+    fetchMediaData(form.mediaUrl);
   };
 
   const handleSubmit = async (e) => {
@@ -209,15 +278,28 @@ const AddMedia = () => {
                 <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                   Link to Watch *
                 </label>
-                <input
-                  type="url"
-                  name="mediaUrl"
-                  value={form.mediaUrl}
-                  onChange={handleChange}
-                  required
-                  placeholder="Where can we find this comfort watch?"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
-                />
+                <div className="relative">
+                  <input
+                    type="url"
+                    name="mediaUrl"
+                    value={form.mediaUrl}
+                    onChange={handleChange}
+                    required
+                    placeholder="Paste YouTube or other link here"
+                    className="w-full px-4 py-3 pr-24 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleFetchData}
+                    disabled={isFetchingData || !form.mediaUrl}
+                    className="absolute right-2 top-2 px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isFetchingData ? 'Fetching...' : 'Auto-fill'}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  YouTube links auto-fill details. Other links can be added manually.
+                </p>
               </div>
 
               <div className="pt-2">
