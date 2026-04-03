@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
+import VoiceCallModal from './VoiceCallModal';
 
 const TOPIC_CONTENT = {
   love: {
@@ -92,6 +93,7 @@ const ElariaAI = () => {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [chatPosition, setChatPosition] = useState(defaultChatPosition);
   const [isDragging, setIsDragging] = useState(false);
+  const [voiceCallOpen, setVoiceCallOpen] = useState(false);
   const dragOffsetRef = useRef({ dx: 0, dy: 0 });
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -235,13 +237,13 @@ const ElariaAI = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </button>
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center mr-2 border border-purple-400">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center shrink-0 border border-purple-400">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
             </div>
-            <h1 className="text-lg font-semibold text-white drop-shadow-md">Elaria AI</h1>
+            <h1 className="text-lg font-semibold text-white drop-shadow-md shrink-0">Elaria AI</h1>
           </div>
           {selectedTopic && (
             <button
@@ -267,9 +269,26 @@ const ElariaAI = () => {
           {/* Topic selection menu — redesigned */}
           {showTopicMenu && (
             <div className="flex flex-col items-center justify-center min-h-[360px] text-center px-3 py-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-600 bg-clip-text text-transparent">Hello, I'm Elaria</h2>
-                <p className="text-gray-500 mt-2 max-w-md">What brings you here today? Choose what feels closest.</p>
+              <div className="mb-6 w-full max-w-4xl">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-5 flex-wrap">
+                  <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-600 bg-clip-text text-transparent text-center">
+                    Hello, I&apos;m Elaria
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setVoiceCallOpen(true)}
+                    className="mx-auto sm:mx-0 shrink-0 flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-purple-500 hover:to-fuchsia-500 transition-all border border-white/20"
+                    aria-label="Talk to Elaria AI with voice"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Let's Talk
+                  </button>
+                </div>
+                <p className="text-gray-500 mt-2 max-w-md mx-auto text-center">
+                  What brings you here today? Choose what feels closest.
+                </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl">
                 {TOPICS.map((topic) => (
@@ -467,6 +486,12 @@ const ElariaAI = () => {
         </div>
         )}
       </div>
+
+      <VoiceCallModal
+        isOpen={voiceCallOpen}
+        onClose={() => setVoiceCallOpen(false)}
+        topic={selectedTopic}
+      />
     </div>
   );
 };

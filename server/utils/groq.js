@@ -12,10 +12,14 @@ const TOPIC_PROMPTS = {
   'general': 'The user wants to talk generally. Be a warm, attentive listener. You are Elaria — a gentle companion. Keep replies concise, kind, and human.',
 };
 
-function getSystemPrompt(topic) {
+function getSystemPrompt(topic, language) {
   const base = 'You are Elaria, a kind AI companion in a wellness app. You listen without judging and respond in a warm, supportive way. Use a calm tone and keep responses concise (a few short paragraphs at most).';
   const topicPrompt = topic && TOPIC_PROMPTS[topic];
-  return topicPrompt ? `${base}\n\nContext: ${topicPrompt}` : base;
+  let prompt = topicPrompt ? `${base}\n\nContext: ${topicPrompt}` : base;
+  if (language === 'hi') {
+    prompt += '\n\nLanguage: Write your entire reply in Hindi using Devanagari script. Keep the same warm, gentle tone.';
+  }
+  return prompt;
 }
 
 export const getGroqResponse = async (userPrompt, options = {}) => {
@@ -26,7 +30,8 @@ export const getGroqResponse = async (userPrompt, options = {}) => {
 
   const model = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
   const topic = options.topic || null;
-  const systemPrompt = getSystemPrompt(topic);
+  const language = options.language || null;
+  const systemPrompt = getSystemPrompt(topic, language);
 
   const messages = [
     { role: 'system', content: systemPrompt },
