@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import breathingTune from '../assets/audio/nonenothingnowhere-174-hz-pain-release-156261.mp3';
 
 const steps = [
   { text: 'Breathe In', instruction: 'Fill your lungs completely', color: 'bg-blue-400', duration: 4000 },
@@ -12,6 +13,37 @@ const BreathingModal = ({ onClose }) => {
   const [cycle, setCycle] = useState(1);
   const [scale, setScale] = useState(1);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(true);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = new Audio(breathingTune);
+    const startAtSeconds = 8;
+    audio.loop = true;
+    audio.volume = 0.8;
+    audio.currentTime = startAtSeconds;
+    audioRef.current = audio;
+
+    audio.play().catch(() => {});
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isAudioPlaying) {
+      audio.play().catch(() => {});
+      return;
+    }
+
+    audio.pause();
+  }, [isAudioPlaying]);
 
   useEffect(() => {
     let timeout;
@@ -65,8 +97,31 @@ const BreathingModal = ({ onClose }) => {
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 Breathing Exercise
               </h2>
-              <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-blue-600 dark:text-blue-300 text-sm font-medium">
-                Cycle {cycle} of 3
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsAudioPlaying(prev => !prev)}
+                  className="h-9 w-9 flex items-center justify-center bg-blue-100 dark:bg-blue-900 rounded-full text-blue-600 dark:text-blue-300"
+                  aria-label={isAudioPlaying ? 'Mute breathing tune' : 'Play breathing tune'}
+                  title={isAudioPlaying ? 'Mute breathing tune' : 'Play breathing tune'}
+                >
+                  {isAudioPlaying ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14.489 3.152a1 1 0 00-1.057.183L9.414 7H6a3 3 0 00-3 3v4a3 3 0 003 3h3.414l4.018 3.665A1 1 0 0015 19.93V4a1 1 0 00-.511-.848z" />
+                      <path d="M17.707 8.293a1 1 0 010 1.414A3.978 3.978 0 0016.5 12c0 .848.263 1.636.707 2.293a1 1 0 01-1.414 1.414A5.972 5.972 0 0114.5 12c0-1.524.57-2.914 1.293-3.707a1 1 0 011.414 0z" />
+                      <path d="M20.536 5.464a1 1 0 010 1.414C19.267 8.147 18.5 9.989 18.5 12s.767 3.853 2.036 5.122a1 1 0 01-1.414 1.414C17.486 16.9 16.5 14.553 16.5 12s.986-4.9 2.622-6.536a1 1 0 011.414 0z" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14.489 3.152a1 1 0 00-1.057.183L9.414 7H6a3 3 0 00-3 3v4a3 3 0 003 3h3.414l4.018 3.665A1 1 0 0015 19.93V4a1 1 0 00-.511-.848z" />
+                      <path d="M18.293 8.293a1 1 0 011.414 0L21 9.586l1.293-1.293a1 1 0 111.414 1.414L22.414 11l1.293 1.293a1 1 0 01-1.414 1.414L21 12.414l-1.293 1.293a1 1 0 01-1.414-1.414L19.586 11l-1.293-1.293a1 1 0 010-1.414z" />
+                    </svg>
+                  )}
+                </motion.button>
+                <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-blue-600 dark:text-blue-300 text-sm font-medium">
+                  Cycle {cycle} of 3
+                </div>
               </div>
             </div>
 
