@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import BreathingModal from '../components/BreathingModal';
 import SOSModal from '../components/SOSModal';
+import AntiStress from './Toolkit/AntiStress';
 import axios from '../utils/api';
 import { toast } from 'react-toastify';
 
@@ -30,6 +31,7 @@ const Support = () => {
   const navigate = useNavigate();
   const [showBreathing, setShowBreathing] = useState(false);
   const [showSOS, setShowSOS] = useState(false);
+  const [showAntiStress, setShowAntiStress] = useState(false);
   const [activePath, setActivePath] = useState('discover');
   const [darkMode, setDarkMode] = useState(false);
   const [isHoveringSOS, setIsHoveringSOS] = useState(false);
@@ -346,7 +348,7 @@ const Support = () => {
                 </motion.button>
               </motion.div>
               
-              {/* Mood Card */}
+              {/* Anti Stress */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -355,7 +357,7 @@ const Support = () => {
                 <motion.button
                   whileHover={{ y: -8, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate('/mood-tracker')}
+                  onClick={() => setShowAntiStress(true)}
                   className="w-full h-full bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-[#e2e8f0] dark:border-[#334155] flex flex-col items-center justify-center hover:shadow-md transition-all relative overflow-hidden"
                 >
                   <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-[#e8f5ff]/30 dark:bg-[#3730a3]/10 blur-xl"></div>
@@ -366,8 +368,8 @@ const Support = () => {
                   >
                     <FaHeartbeat className="text-[#6b7bff] dark:text-[#818cf8]" size={24} />
                   </motion.div>
-                  <span className="font-medium">Mood</span>
-                  <span className="text-sm text-[#6b7280] dark:text-gray-400 mt-1">Mood Journal</span>
+                  <span className="font-medium">Anti Stress</span>
+                  <span className="text-sm text-[#6b7280] dark:text-gray-400 mt-1">Ground Yourself</span>
                 </motion.button>
               </motion.div>
             </div>
@@ -553,6 +555,9 @@ const Support = () => {
         )}
         {showSOS && (
           <SOSModal onConfirm={handleSendSOS} onCancel={() => setShowSOS(false)} />
+        )}
+        {showAntiStress && (
+          <AntiStress onClose={() => setShowAntiStress(false)} />
         )}
       </AnimatePresence>
     </div>

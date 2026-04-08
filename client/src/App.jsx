@@ -20,7 +20,8 @@ import AddMedia from "./pages/AddPersonal/AddMedia";
 import AddPoem from "./pages/AddPersonal/AddPoem";
 import DiagnoseYourself from './pages/Toolkit/DiagnoseYourself';
 import Support from "./pages/Support";
-import MoodTracker from './pages/Toolkit/MoodTracker';
+//import MoodTracker from './pages/Toolkit/MoodTracker';
+import AntiStress from './pages/Toolkit/AntiStress';
 import Contacts from './pages/Toolkit/Contacts';
 import ApplyHelper from "./pages/Community/ApplyHelper";
 import HelperDirectory from "./pages/Community/HelperDirectory";
@@ -72,7 +73,8 @@ function App() {
           <Route path="/add-poem" element={<PrivateRoute><AddPoem /></PrivateRoute>} />
           <Route path="/diagnose-yourself" element={<PrivateRoute><DiagnoseYourself /></PrivateRoute>} />
           <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
-          <Route path="/mood-tracker" element={<PrivateRoute><MoodTracker /></PrivateRoute>} />
+          {/* <Route path="/mood-tracker" element={<PrivateRoute><MoodTracker /></PrivateRoute>} /> */}
+          <Route path="/anti-stress" element={<PrivateRoute><AntiStress /></PrivateRoute>} />
           <Route path="/contacts" element={<PrivateRoute><Contacts /></PrivateRoute>} />
           <Route path="/apply-helper" element={<PrivateRoute><ApplyHelper /></PrivateRoute>} />
           <Route path="/helper-directory" element={<PrivateRoute><HelperDirectory /></PrivateRoute>} />

@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 
 const GratitudeJournal = () => {
   const [currentContent, setCurrentContent] = useState({});
+  const [showGratitudeModal, setShowGratitudeModal] = useState(false);
+  const [gratitudeList, setGratitudeList] = useState(Array(10).fill(''));
   const navigate = useNavigate();
 
   const motivationalQuotes = [
@@ -93,6 +95,12 @@ const GratitudeJournal = () => {
     setCurrentContent({ quote: randomQuote, message: randomMessage });
   };
 
+  const handleGratitudeChange = (index, value) => {
+    setGratitudeList(prev =>
+      prev.map((item, i) => (i === index ? value : item))
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-[#0f172a] dark:to-[#1e293b] text-gray-800 dark:text-gray-100">
       {/* Animated background elements */}
@@ -173,15 +181,25 @@ const GratitudeJournal = () => {
                 — {currentContent.quote?.author}
               </p>
               
-              <motion.button
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={setRandomContent}
-                className="mt-8 px-5 py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-indigo-600 dark:text-indigo-300 rounded-xl font-medium flex items-center gap-2 hover:shadow-md transition-all"
-              >
-                <FaSyncAlt />
-                New Inspiration
-              </motion.button>
+              <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={setRandomContent}
+                  className="px-5 py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-indigo-600 dark:text-indigo-300 rounded-xl font-medium flex items-center gap-2 hover:shadow-md transition-all"
+                >
+                  <FaSyncAlt />
+                  New Inspiration
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowGratitudeModal(true)}
+                  className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-md transition-all"
+                >
+                  Write Gratitude
+                </motion.button>
+              </div>
             </div>
           </motion.div>
 
@@ -235,6 +253,56 @@ const GratitudeJournal = () => {
           <p>Refresh the page or click "New Inspiration" for more motivational content</p>
         </motion.div>
       </div>
+
+      {showGratitudeModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="w-full max-w-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">10 Things You Are Grateful For</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  This is just for you in this session and is not saved to the database.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGratitudeModal(false)}
+                className="text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white text-lg"
+                aria-label="Close gratitude popup"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {gratitudeList.map((item, index) => (
+                <input
+                  key={`gratitude-${index}`}
+                  type="text"
+                  value={item}
+                  onChange={e => handleGratitudeChange(index, e.target.value)}
+                  placeholder={`I am grateful for... (${index + 1}/10)`}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#1f2937] text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowGratitudeModal(false)}
+                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium"
+              >
+                Done
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
