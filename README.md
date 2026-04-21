@@ -4,6 +4,8 @@
 
 ELARIA is a personal safe space for mental wellness and emotional support. It offers a comfort space, wellness tools, community support, and an AI companion — all in one place.
 
+demo video : https://tinyurl.com/ycybam55
+
 ---
 
 ## Features
